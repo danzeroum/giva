@@ -1,0 +1,11 @@
+{
+  "ok": { "label": "ok", "farol": "verde" },
+  "alerta_similaridade": { "label": "conferir similaridade", "farol": "amarelo" },
+  "codigo_alterado_pela_revisao_sh": { "label": "código alterado pela revisão do SH", "farol": "amarelo" },
+  "descricao_vigente_periodo_nao_carregado": { "label": "descrição vigente (histórico não carregado)", "farol": "amarelo" },
+  "periodo_sem_cobertura": { "label": "período sem cobertura", "farol": "amarelo" },
+  "pendente_validacao_uf": { "label": "estado pendente de validação", "farol": "amarelo" },
+  "requer_revisao": { "label": "requer revisão", "farol": "vermelho" },
+  "entrada_invalida": { "label": "entrada inválida", "farol": "vermelho" },
+  "codigo_inexistente": { "label": "código inexistente", "farol": "vermelho" }
+}

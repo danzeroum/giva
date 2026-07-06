@@ -1,0 +1,72 @@
+# Ambiente de desenvolvimento e deploy (VPS — decisão GIVA §5: hospedagem em
+# VPS como forma inicial; a arquitetura permanece 100% local por dentro — nenhum
+# dado de cliente sai para API externa no caminho de enriquecimento, RNF-01/02).
+#
+# Para rodar o alembic/app contra este banco, no host: exporte DATABASE_URL, ou
+# — só em dev local — ALEMBIC_ALLOW_INI_URL=1 para usar a URL do alembic.ini.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: giva
+      POSTGRES_USER: giva
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev-somente-local}
+    ports: ["${DB_PORT:-5432}:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U giva"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build: .
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://giva:${POSTGRES_PASSWORD:-dev-somente-local}@db:5432/giva
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: .
+    ports: ["${API_PORT:-8000}:8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://giva:${POSTGRES_PASSWORD:-dev-somente-local}@db:5432/giva
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:${FRONTEND_PORT:-8080}}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env — nunca hardcode}
+      DADOS_DIR: /data
+    volumes: [dados_lotes:/data]
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["python", "-m", "giva.worker"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://giva:${POSTGRES_PASSWORD:-dev-somente-local}@db:5432/giva
+      DADOS_DIR: /data
+    volumes: [dados_lotes:/data]
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports: ["${FRONTEND_PORT:-8080}:80"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  dados_lotes:
