@@ -1,15 +1,22 @@
-"""ResolutorNCM (Módulo B — RF-12/13), Sprint 2.
+"""ResolutorNCM (Módulo B — RF-12/13/14).
 
-Resolve o status e a descrição de um NCM num período, consumindo a DT-01 e a
-base `ncm_vigente`. Fase 1 (secao-1-ncm §1.2): o snapshot é só a redação
-vigente; para períodos anteriores à `data_inicio` da redação, sinaliza
-`descricao_vigente_periodo_nao_carregado` — computável por código (F4).
+Resolve o status e a **descrição de época** de um NCM num período, consumindo a
+DT-01 e as bases `ncm_historico` (bitemporal) e `ncm_vigente`.
 
-Correlação SH 2022 (`ncm_correlacao`) só é carregada na R1.5 (RF-13). Enquanto
-vazia, a regra 1 da DT-01 (`codigo_alterado_pela_revisao_sh`) não dispara e um
-código inexistente sai como `codigo_inexistente`. Comportamento **deliberado**
-de Fase 1 — fixado por teste para que a mudança na R1.5 seja visível, não
-acidental.
+Precedência (period-aware — o coração do GIVA, critério de aceite nº 1):
+1. **`ncm_historico`** — se houver uma redação cuja vigência cobre o período
+   informado, ela responde: a descrição **da época**, não a atual. É o que
+   permite o uso retrospectivo (um NCM de 2017 pode ter descrição diferente da
+   de 2024).
+2. **`ncm_vigente`** (fallback) — quando o histórico ainda não cobre aquela
+   janela: se o período for ≥ `data_inicio` da redação vigente, responde a
+   vigente (`ok`); se anterior, sinaliza
+   `descricao_vigente_periodo_nao_carregado` (não inventa a de época).
+3. Código inexistente → `codigo_inexistente`, ou
+   `codigo_alterado_pela_revisao_sh` se houver correlação SH (`ncm_correlacao`).
+
+O `if` que escolhe histórico vs. vigente é guarda de *disponibilidade de dado*,
+não regra fiscal — a decisão de status continua saindo da DT-01.
 """
 
 from __future__ import annotations
@@ -36,9 +43,31 @@ class RedacaoVigente:
     carga_id: int
 
 
+@dataclass(frozen=True)
+class RedacaoPeriodo:
+    """Redação de um NCM vigente NAQUELE período, vinda de `ncm_historico`
+    (bitemporal). `vigencia_inicio`/`vigencia_fim` delimitam a janela em que
+    esta redação valeu; `vigencia_fim=None` = ainda vigente."""
+
+    codigo: str
+    descricao: str
+    vigencia_inicio: date
+    vigencia_fim: date | None
+    ato_tipo: str | None
+    ato_numero: str | None
+    ato_ano: str | None
+    data_coleta: date
+    carga_id: int
+
+
 class RepositorioNCM(Protocol):
     """Acesso às bases de NCM. Abstrai o SQL para o componente ser testável sem
     banco (fake em memória na unidade; psycopg na integração)."""
+
+    def buscar_redacao_periodo(self, codigo: str, periodo: date) -> RedacaoPeriodo | None:
+        """A redação de `ncm_historico` cuja vigência cobre `periodo`, ou None
+        se o histórico não cobrir aquela janela (cai para a vigente)."""
+        ...
 
     def buscar_vigente(self, codigo: str) -> RedacaoVigente | None:
         """A redação vigente do `codigo` (8 dígitos, sem pontuação), ou None."""
@@ -76,6 +105,15 @@ class ResolutorNCM:
         self._repo = repositorio
 
     def resolver(self, codigo: str, periodo: date) -> ResultadoNCM:
+        historica = self._repo.buscar_redacao_periodo(codigo, periodo)
+        if historica is not None:  # descrição DA ÉPOCA — precedência (RF-14)
+            decisao = avaliar(DT01_STATUS_NCM, _entradas_historico())
+            return ResultadoNCM(
+                decisao.saidas["status_ncm"],
+                historica.descricao,
+                _proveniencia_periodo(decisao.proveniencia, historica),
+            )
+
         vigente = self._repo.buscar_vigente(codigo)
         decisao = avaliar(DT01_STATUS_NCM, self._entradas(codigo, periodo, vigente))
         status: str = decisao.saidas["status_ncm"]
@@ -101,6 +139,12 @@ class ResolutorNCM:
         }
 
 
+def _entradas_historico() -> dict[str, Any]:
+    """Redação de época encontrada = código existe e o período é coberto por ela
+    (DT-01 regra 3 → ok)."""
+    return {"codigo_existe": True, "periodo_cobre_vigente": True, "tem_correlacao": False}
+
+
 def _proveniencia(regra_dt: str, v: RedacaoVigente) -> ProvenienciaNCM:
     return ProvenienciaNCM(
         regra_dt=regra_dt,
@@ -110,4 +154,18 @@ def _proveniencia(regra_dt: str, v: RedacaoVigente) -> ProvenienciaNCM:
         data_inicio=v.data_inicio,
         data_coleta=v.data_coleta,
         carga_id=v.carga_id,
+    )
+
+
+def _proveniencia_periodo(regra_dt: str, r: RedacaoPeriodo) -> ProvenienciaNCM:
+    """Proveniência da redação de época: `data_inicio` = início da janela de
+    vigência histórica que respondeu."""
+    return ProvenienciaNCM(
+        regra_dt=regra_dt,
+        ato_tipo=r.ato_tipo,
+        ato_numero=r.ato_numero,
+        ato_ano=r.ato_ano,
+        data_inicio=r.vigencia_inicio,
+        data_coleta=r.data_coleta,
+        carga_id=r.carga_id,
     )
