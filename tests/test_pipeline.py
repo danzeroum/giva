@@ -67,11 +67,6 @@ class FakeAliquota:
         return None
 
 
-class FakeParametros:
-    def thresholds_similaridade(self):
-        return {"t_ok": 0.85, "t_rev": 0.60}
-
-
 def _pipeline():
     categoria = FakeCategoria(
         ncm=[("8482", "Peça de máquina")],
@@ -82,7 +77,7 @@ def _pipeline():
         EtapaNCM(ResolutorNCM(FakeNCM())),
         EtapaAliquota(ResolutorAliquota(FakeAliquota())),
         EtapaCategoria(Categorizador(categoria)),
-        EtapaSimilaridade(AvaliadorSimilaridade(FakeParametros())),
+        EtapaSimilaridade(AvaliadorSimilaridade()),
     ])
 
 

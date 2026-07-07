@@ -1,6 +1,11 @@
-"""Contrato front↔backend: o conjunto de status emitidos pelas DT-01..04 tem de
-ser exatamente o declarado em `frontend/src/data/statuses.json` (cor/rótulo).
-Um status novo numa DT sem entrada no JSON quebra o CI, não a interface."""
+"""Contrato front↔backend: todo status que uma DT pode emitir precisa ter
+cor/rótulo em `frontend/src/data/statuses.json`. Um status novo numa DT sem
+entrada no JSON quebra o CI, não a interface.
+
+O front PODE ter status a mais (reservados/para exibição — ex.:
+`alerta_similaridade`, o nível 'leve' que a DT-03 v2 ainda não emite mas que um
+refinamento futuro pode voltar a usar). O invariante crítico é a inclusão:
+`das_dts ⊆ do_front`."""
 
 from __future__ import annotations
 
@@ -15,10 +20,8 @@ _JSON = (
 )
 
 
-def test_dts_e_front_declaram_o_mesmo_conjunto_de_status():
+def test_todo_status_das_dts_tem_cor_no_front():
     do_front = set(json.loads(_JSON.read_text(encoding="utf-8")).keys())
     das_dts = statuses_possiveis()
-    assert das_dts == do_front, (
-        f"faltando no front: {das_dts - do_front}; "
-        f"sobrando no front: {do_front - das_dts}"
-    )
+    faltando = das_dts - do_front
+    assert not faltando, f"status emitidos por DT sem entrada no front: {faltando}"

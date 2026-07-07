@@ -19,7 +19,6 @@ from __future__ import annotations
 from giva.decisao.interpretador import (
     Diferente,
     Igual,
-    MaiorIgualParametro,
     NaoNulo,
     Qualquer,
     Regra,
@@ -96,28 +95,28 @@ DT02_ALIQUOTA = TabelaDecisao(
 )
 
 # ---------------------------------------------------------------------------
-# DT-03 — status_descricao (limiares T_ok/T_rev vêm da configuração — RF-24)
-# Entrada: score (float 0..1). Mapeia o enum GIVA nenhuma|leve|forte:
-#   ok = nenhuma · alerta_similaridade = leve · requer_revisao = forte (RN1).
+# DT-03 — status_descricao (divergência). Mapeia o enum GIVA nenhuma|forte:
+#   ok = nenhuma · requer_revisao = forte (RN1).
+# Entrada: conflito_categoria (bool). Decisão do escritório (v1): a divergência
+# é medida por CONFLITO de categoria — o NCM aponta uma categoria e a descrição
+# aponta outra (ex.: NCM de rolamento + 'martelo'). Similaridade textual (Jaccard)
+# não replica o julgamento humano contra descrições tarifárias genéricas
+# ('- Partes', '-- Outros') → IA semântica fica para a v2 (PRD §12.5). O score é
+# mantido só como informação na proveniência, não decide o status.
 # ---------------------------------------------------------------------------
 DT03_STATUS_DESCRICAO = TabelaDecisao(
     nome="DT-03_status_descricao",
-    versao="1.0",
+    versao="2.0",
     regras=(
         Regra(
             numero=1,
-            quando={"score": MaiorIgualParametro("t_ok")},
-            entao={"status_descricao": "ok"},
-        ),
-        Regra(
-            numero=2,
-            quando={"score": MaiorIgualParametro("t_rev")},
-            entao={"status_descricao": "alerta_similaridade"},
-        ),
-        Regra(
-            numero=3,
-            quando={"score": Qualquer()},
+            quando={"conflito_categoria": Igual(True)},
             entao={"status_descricao": "requer_revisao"},
+        ),
+        Regra(  # catch-all: sem conflito → sem evidência de divergência
+            numero=2,
+            quando={"conflito_categoria": Qualquer()},
+            entao={"status_descricao": "ok"},
         ),
     ),
 )

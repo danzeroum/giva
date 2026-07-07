@@ -147,6 +147,7 @@ class EtapaCategoria:
             "versao": r.proveniencia.versao,
             "caminho": r.proveniencia.caminho,
             "sugestivo": "true" if r.sugestivo else "false",
+            "conflito": "true" if r.conflito_descricao else "false",
         }
         if r.motivo_indefinido is not None:
             proveniencia["motivo_indefinido"] = r.motivo_indefinido
@@ -164,7 +165,11 @@ class EtapaSimilaridade:
         oficial = linha.enriquecimento.get("descricao_oficial_ncm")
         if not linha.valida or not oficial or linha.bruto_descricao is None:
             return
-        r = self._avaliador.avaliar(linha.bruto_descricao, oficial)
+        # divergência = conflito de categoria NCM×descrição (decisão do escritório).
+        conflito = linha.proveniencia.get("categoria", {}).get("conflito") == "true"
+        r = self._avaliador.avaliar(
+            linha.bruto_descricao, oficial, conflito_categoria=conflito
+        )
         linha.enriquecimento["status_descricao"] = r.status_descricao
         linha.regras_disparadas["DT-03"] = r.proveniencia.regra
         linha.proveniencia["descricao"] = {
