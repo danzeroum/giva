@@ -77,7 +77,9 @@ class EtapaNCM:
         self._resolvedor = resolvedor
 
     def processar(self, linha: LinhaLote) -> None:
-        if not linha.valida or linha.ncm is None or linha.periodo is None:
+        # roda mesmo com NCM ausente (linha.ncm None): o resolvedor devolve
+        # `ncm_ausente` e a categoria virá da descrição (doc 04 §3).
+        if not linha.valida or linha.periodo is None:
             return
         r = self._resolvedor.resolver(linha.ncm, linha.periodo)
         linha.enriquecimento["descricao_oficial_ncm"] = r.descricao or ""

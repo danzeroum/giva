@@ -81,3 +81,10 @@ def test_codigo_extinto_com_correlacao_sh():
     repo = FakeRepo(correlacoes={"84829900"})
     r = ResolutorNCM(repo).resolver("84829900", date(2023, 1, 1))
     assert r.status_ncm == "codigo_alterado_pela_revisao_sh"
+
+
+def test_ncm_ausente_nao_e_inexistente():
+    # NCM None (branco/00000000 normalizados) → ncm_ausente, sem descrição.
+    r = ResolutorNCM(FakeRepo()).resolver(None, date(2023, 1, 1))
+    assert r.status_ncm == "ncm_ausente"
+    assert r.descricao is None

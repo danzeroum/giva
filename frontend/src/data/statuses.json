@@ -5,6 +5,7 @@
   "descricao_vigente_periodo_nao_carregado": { "label": "descrição vigente (histórico não carregado)", "farol": "amarelo" },
   "periodo_sem_cobertura": { "label": "período sem cobertura", "farol": "amarelo" },
   "pendente_validacao_uf": { "label": "estado pendente de validação", "farol": "amarelo" },
+  "ncm_ausente": { "label": "NCM ausente (categoria pela descrição)", "farol": "amarelo" },
   "requer_revisao": { "label": "requer revisão", "farol": "vermelho" },
   "entrada_invalida": { "label": "entrada inválida", "farol": "vermelho" },
   "codigo_inexistente": { "label": "código inexistente", "farol": "vermelho" }

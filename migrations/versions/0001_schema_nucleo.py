@@ -100,12 +100,14 @@ def upgrade() -> None:
     )""")
 
     # Regra por palavra-chave na descrição (§2.2, fallback quando o NCM não resolve).
+    # PK inclui `categoria`: um gatilho PODE apontar 2+ categorias de propósito
+    # (ex.: 'luva' → EPI e Limpeza) — aí o termo sozinho é ambíguo (Indefinido).
     op.execute("""
     CREATE TABLE regra_palavra_categoria (
         palavra   text NOT NULL,                   -- gatilho (armazenado em minúsculas)
         categoria text NOT NULL,
         versao    text NOT NULL,
-        PRIMARY KEY (palavra, versao),
+        PRIMARY KEY (palavra, categoria, versao),
         FOREIGN KEY (categoria, versao) REFERENCES categoria(nome, versao)
     )""")
 

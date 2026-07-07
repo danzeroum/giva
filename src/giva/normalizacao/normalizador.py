@@ -36,6 +36,11 @@ _ACENTOS = str.maketrans("áàâãéêíóôõúüç", "aaaaeeiooouuc")
 class ResultadoNormalizacao:
     valor: str | date | None
     motivo_falha: str | None = None
+    # NCM ausente (branco/`00000000`): NÃO é falha de linha (doc 04 §3). A linha
+    # segue — categoria vem da descrição e a alíquota resolve por UF+período —,
+    # só o NCM fica sem resolver. `ausente` distingue isso de um NCM malformado
+    # (esse sim é `motivo_falha` → entrada_invalida).
+    ausente: bool = False
 
     @property
     def valido(self) -> bool:
@@ -43,12 +48,14 @@ class ResultadoNormalizacao:
 
 
 def normalizar_ncm(bruto: object) -> ResultadoNormalizacao:
-    """'8471.30.12' → '84713012'; '1012100' → '01012100' (zeros à ESQUERDA)."""
+    """'8471.30.12' → '84713012'; '1012100' → '01012100' (zeros à ESQUERDA).
+    Branco e `00000000` → **ausente** (não falha): cai para a regra por
+    descrição (doc 04 §3). Não numérico / comprimento inválido → falha."""
     if bruto is None:
-        return ResultadoNormalizacao(None, "NCM ausente")
+        return ResultadoNormalizacao(None, ausente=True)
     texto = re.sub(r"[.\s\-]", "", str(bruto).strip())
     if not texto:
-        return ResultadoNormalizacao(None, "NCM ausente")
+        return ResultadoNormalizacao(None, ausente=True)
     if not texto.isdigit():
         return ResultadoNormalizacao(
             None, f"NCM contém caracteres não numéricos: '{bruto}'"
@@ -63,7 +70,10 @@ def normalizar_ncm(bruto: object) -> ResultadoNormalizacao:
             f"NCM com apenas {len(texto)} dígitos — confira se o valor está "
             f"truncado além da perda de zeros à esquerda: '{bruto}'",
         )
-    return ResultadoNormalizacao(texto.zfill(8))
+    normalizado = texto.zfill(8)
+    if set(normalizado) == {"0"}:  # 00000000 = ausente (não é NCM real, doc 04 §3)
+        return ResultadoNormalizacao(None, ausente=True)
+    return ResultadoNormalizacao(normalizado)
 
 
 # Tabela de formatos aceitos: padrão → construtor de date a partir dos grupos.

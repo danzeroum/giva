@@ -26,7 +26,7 @@ from giva.api.schemas.lotes import (
 from giva.api.seguranca import UsuarioToken
 from giva.armazenamento import caminho_saida, salvar_entrada
 from giva.decisao.statuses import pior_status
-from giva.pipeline.leitor import ler_csv
+from giva.pipeline.leitor import ler_planilha
 from giva.pipeline.persistencia_sql import abrir_lote, concluir_lote, persistir_linhas
 from giva.saida.montador import construir_resumo, montar_xlsx
 from giva.worker.composicao import pipeline_padrao
@@ -86,16 +86,16 @@ def enviar(
     con: Annotated[psycopg.Connection[Any], Depends(get_conexao)],
 ) -> LoteResposta:
     conteudo = arquivo.file.read()
+    nome_arquivo = arquivo.filename or "planilha.csv"
     try:
-        texto = conteudo.decode("utf-8")
+        # despacha .xlsx (assinatura ZIP) vs CSV; ColunaAusenteError -> 422.
+        dados = ler_planilha(conteudo, nome_arquivo)
     except UnicodeDecodeError as exc:
         raise HTTPException(
-            status_code=422, detail="Arquivo não é texto UTF-8 válido."
+            status_code=422, detail="Arquivo não é CSV UTF-8 nem .xlsx válido."
         ) from exc
-    dados = ler_csv(texto)  # ColunaAusenteError -> 422 (handler em api.erros)
 
     caminho_entrada = salvar_entrada(conteudo)
-    nome_arquivo = arquivo.filename or "planilha.csv"
     if len(dados.linhas) <= _LIMITE_SINCRONO:
         lote_id = abrir_lote(con, arquivo_entrada=caminho_entrada, criado_por=usuario.email)
         con.execute(

@@ -104,7 +104,11 @@ class ResolutorNCM:
     def __init__(self, repositorio: RepositorioNCM) -> None:
         self._repo = repositorio
 
-    def resolver(self, codigo: str, periodo: date) -> ResultadoNCM:
+    def resolver(self, codigo: str | None, periodo: date) -> ResultadoNCM:
+        if codigo is None:  # NCM ausente (branco/00000000) — categoria vem da descrição
+            decisao = avaliar(DT01_STATUS_NCM, {"codigo_ausente": True})
+            return ResultadoNCM(decisao.saidas["status_ncm"], None, None)
+
         historica = self._repo.buscar_redacao_periodo(codigo, periodo)
         if historica is not None:  # descrição DA ÉPOCA — precedência (RF-14)
             decisao = avaliar(DT01_STATUS_NCM, _entradas_historico())

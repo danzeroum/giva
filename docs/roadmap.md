@@ -42,6 +42,25 @@ histórica** (Fase 2) — motor e UI se constroem em dias; a base é semanas.
   com disclaimer da categoria; Bloco B como stubs marcados; modo demo.
 - `npm ci` + eslint + tsc + vite build verdes; job de CI dedicado.
 
+## Validação contra o gabarito (planilha-teste 05 × gabarito 06)
+
+Rodando a planilha-teste real (162 linhas) pelo pipeline, com a base do Classif
+promovida (`scripts/comparar_gabarito.py`):
+
+- **Alíquota: 100%** — histórico das 11 UFs do playbook com as viradas
+  (RJ/PR/RS/GO/CE) + REQUER VALIDAÇÃO MANUAL para UFs fora do seed (RN4).
+- **Categoria: ~77%** — refinável ampliando as regras de faixa NCM/palavra
+  (backlog: casos de fronteira como HDMI, placa cega).
+- **Confiança / Divergência: baixo casamento** — divergências de *calibração*,
+  não bugs: (a) a confiança segue a definição do doc 04 §2.3 (Alta só com NCM
+  **e** descrição concordando), enquanto o gabarito trata sinal único como Alta;
+  (b) a similaridade é Jaccard sobre a descrição oficial (terse) → precisa da
+  recalibração de thresholds já prevista (PRD §5) e da descrição de POSIÇÃO/TIPI
+  por período (base histórica).
+
+Gaps de código fechados nesta rodada: leitor `.xlsx`; NCM ausente/branco →
+categoriza por descrição e resolve alíquota; histórico decenal de alíquotas.
+
 ## Fase 5 — Operação da base (em andamento)
 - ✅ **Ingestão real do Classif**: `python -m giva.rotinas.ingestao_classif`
   carrega `ncm_vigente` do snapshot oficial versionado (~10,5 mil NCMs), com

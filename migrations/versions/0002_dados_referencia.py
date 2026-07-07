@@ -58,9 +58,11 @@ REGRAS_NCM = [
     ("4818", "Material de limpeza"),     # higiênico/toalha
     ("3401", "Material de limpeza"),     # sabões
     ("3402", "Material de limpeza"),     # tensoativos
+    ("28", "Produto químico"),           # cap. 28 — químicos inorgânicos
     ("32", "Produto químico"),           # tintas/pigmentos
     ("35", "Produto químico"),           # colas
     ("38", "Produto químico"),           # químicos diversos
+    ("4808", "Material de embalagem"),   # papelão ondulado (embalagem)
     ("2207", "Produto químico"),         # álcool etílico (uso industrial)
     ("3923", "Material de embalagem"),   # embalagem de plástico
     ("82", "Ferramentas"),               # cap. 82 — ferramentas manuais
@@ -96,6 +98,10 @@ _PALAVRAS = {
     "Material de limpeza": [
         "papel higienico", "toalha de papel", "sabonete", "detergente",
         "saco de lixo", "palha de aco", "vassoura", "fibra",
+        # 'luva' e 'saco plastico' também apontam limpeza — de propósito: com EPI
+        # e Embalagem, o termo sozinho vira AMBÍGUO (Indefinido-ambíguo, Baixa),
+        # que é o comportamento correto de fronteira (doc 04 §3 — não decidir só).
+        "luva", "saco plastico",
     ],
     "Material de escritório e informática": [
         "papel a4", "caneta", "etiqueta", "mouse", "teclado",
@@ -130,44 +136,41 @@ _PALAVRAS = {
     "Material de jardinagem": ["jardinagem", "jardim"],
 }
 
-# --- Seed das alíquotas modais 2026 (27 UFs) — modal nominal, sem FECP ---------
-# (uf, aliquota_modal, fecp_percentual|None, fecp_incidencia, status_validacao,
-#  fonte_legal|None). Base: SimTax — Tabela ICMS 2026 (fonte compilada); a modal
-#  é o valor entregue (decisão GIVA §3). Nenhuma UF está 'validada' — em produção
-#  cai em 'pendente_validacao_uf' até a varredura oficial (playbook).
-ALIQUOTAS = [
-    ("AC", "19.0", None, "a_validar", "pendente_validacao", None),
-    ("AL", "20.5", "1.0", "ampla", "confirmada_fonte_secundaria", "Lei estadual nº 9.776/2025"),
-    ("AM", "20.0", None, "a_validar", "pendente_validacao", None),
-    ("AP", "18.0", None, "a_validar", "pendente_validacao", None),
-    ("BA", "20.5", "2.0", "produtos_selecionados", "confirmada_fonte_secundaria", None),
-    ("CE", "20.0", "2.0", "produtos_selecionados", "pendente_validacao", None),
-    ("DF", "20.0", "2.0", "produtos_selecionados", "pendente_validacao", None),
-    ("ES", "17.0", None, "a_validar", "pendente_validacao", None),
-    ("GO", "19.0", "2.0", "produtos_selecionados", "pendente_validacao", None),
-    ("MA", "23.0", "2.0", "a_validar", "confirmada_fonte_secundaria", None),
-    ("MG", "18.0", "2.0", "produtos_selecionados", "confirmada_fonte_secundaria", None),
-    ("MS", "17.0", None, "a_validar", "pendente_validacao", None),
-    ("MT", "17.0", None, "a_validar", "pendente_validacao", None),
-    ("PA", "19.0", None, "a_validar", "pendente_validacao", None),
-    ("PB", "20.0", "2.0", "a_validar", "pendente_validacao", None),
-    ("PE", "20.5", "2.0", "a_validar", "divergencia_entre_fontes", None),
-    ("PI", "22.5", "2.0", "a_validar", "divergencia_entre_fontes", None),
-    ("PR", "19.5", "2.0", "produtos_selecionados", "confirmada_fonte_secundaria", None),
-    ("RJ", "20.0", "2.0", "ampla", "confirmada_fonte_secundaria",
-     "Lei nº 2.657/96, art. 14, I + LC nº 210/2023 (FECP)"),
-    ("RN", "20.0", "2.0", "a_validar", "pendente_validacao", None),
-    ("RO", "19.5", None, "a_validar", "pendente_validacao", None),
-    ("RR", "20.0", None, "a_validar", "pendente_validacao", None),
-    ("RS", "17.0", "2.0", "produtos_selecionados", "confirmada_fonte_secundaria", None),
-    ("SC", "17.0", None, "a_validar", "confirmada_fonte_secundaria", None),
-    ("SE", "19.0", "1.0", "ampla", "pendente_validacao", None),
-    ("SP", "18.0", "2.0", "produtos_selecionados", "confirmada_fonte_secundaria",
-     "RICMS/SP (Dec. 45.490/2000), art. 52, I"),
-    ("TO", "20.0", None, "a_validar", "pendente_validacao", None),
+# --- Alíquotas modais — histórico decenal, NOMINAIS sem FECP (decisão GIVA §3) -
+# 11 UFs do seed do playbook §7 entram VALIDADAS, com as viradas verificadas em
+# fonte oficial (RJ/PR/RS/GO/CE). As demais 16 UFs entram pendentes: em produção
+# o sistema responde REQUER VALIDAÇÃO MANUAL (RN4 — nunca chutar), até a varredura
+# oficial de cada estado.
+# Cada tupla validada: (uf, inicio, fim|None, modal, fonte_legal).
+VALIDADAS = [
+    ("SP", "2016-01-01", None, "18.0", "RICMS/SP (Dec. 45.490/2000), art. 52, I"),
+    ("MG", "2016-01-01", None, "18.0", "RICMS/MG, art. 42"),
+    ("SC", "2016-01-01", None, "17.0", "RICMS/SC, art. 26"),
+    ("ES", "2016-01-01", None, "17.0", "RICMS/ES"),
+    ("BA", "2016-01-01", None, "18.0", "Playbook §7 (2016–2021)"),
+    ("AL", "2016-01-01", None, "18.0", "Playbook §7 (2016–2021)"),
+    ("RJ", "2016-01-01", "2024-03-20", "18.0", "Lei nº 2.657/96, art. 14, I"),
+    ("RJ", "2024-03-20", None, "20.0", "Lei nº 10.253/2023 (virada 20/03/2024)"),
+    ("PR", "2016-01-01", "2023-03-13", "18.0", "RICMS/PR"),
+    ("PR", "2023-03-13", None, "19.0", "Lei nº 21.308/2022 (virada 13/03/2023)"),
+    ("RS", "2016-01-01", "2021-01-01", "18.0", "RICMS/RS"),
+    ("RS", "2021-01-01", "2022-01-01", "17.5", "Lei nº 15.576/2020 (17,5% em 2021)"),
+    ("RS", "2022-01-01", None, "17.0", "Lei nº 15.576/2020 (17% a partir de 2022)"),
+    ("GO", "2016-01-01", "2024-04-01", "17.0", "RICMS/GO"),
+    ("GO", "2024-04-01", None, "19.0", "Lei nº 22.460/2023 (virada 01/04/2024)"),
+    ("CE", "2016-01-01", "2024-01-01", "18.0", "RICMS/CE"),
+    ("CE", "2024-01-01", None, "20.0", "Lei nº 18.305/2023 (virada 01/01/2024)"),
 ]
 
-_FONTE_COMPILADA = "SimTax — Tabela ICMS 2026 (abr/2026, atual. mai/2026)"
+# 16 UFs fora do seed — modal de referência (SimTax 2026), status pendente.
+PENDENTES = {
+    "AC": "19.0", "AM": "20.0", "AP": "18.0", "DF": "20.0", "MA": "23.0",
+    "MS": "17.0", "MT": "17.0", "PA": "19.0", "PB": "20.0", "PE": "20.5",
+    "PI": "22.5", "RN": "20.0", "RO": "19.5", "RR": "20.0", "SE": "19.0",
+    "TO": "20.0",
+}
+
+_FONTE_COMPILADA = "Playbook §7 (viradas verificadas em fonte oficial) / SimTax 2026"
 
 
 def upgrade() -> None:
@@ -202,14 +205,28 @@ def upgrade() -> None:
                 (palavra, categoria, VERSAO),
             )
 
-    for uf, modal, fecp, incid, validacao, fonte_legal in ALIQUOTAS:
+    for uf, inicio, fim, modal, fonte_legal in VALIDADAS:
+        limite = "NULL" if fim is None else "%s"
+        params = (
+            [uf, inicio] + ([] if fim is None else [fim])
+            + [modal, fonte_legal, _FONTE_COMPILADA, carga_id]
+        )
         con.exec_driver_sql(
             "INSERT INTO aliquota_icms_modal "
-            "(uf, vigencia, aliquota_modal, fecp_percentual, fecp_incidencia, "
-            " fonte_legal, fonte_compilada, status_validacao, carga_id) "
-            "VALUES (%s, daterange(%s, NULL, '[)'), %s, %s, %s, %s, %s, %s, %s)",
-            (uf, "2026-01-01", modal, fecp, incid, fonte_legal,
-             _FONTE_COMPILADA, validacao, carga_id),
+            "(uf, vigencia, aliquota_modal, fecp_incidencia, fonte_legal, "
+            " fonte_compilada, status_validacao, carga_id) "
+            f"VALUES (%s, daterange(%s, {limite}, '[)'), %s, 'a_validar', %s, %s, "
+            "'validada', %s)",
+            tuple(params),
+        )
+    for uf, modal in PENDENTES.items():
+        con.exec_driver_sql(
+            "INSERT INTO aliquota_icms_modal "
+            "(uf, vigencia, aliquota_modal, fecp_incidencia, fonte_compilada, "
+            " status_validacao, carga_id) "
+            "VALUES (%s, daterange('2016-01-01', NULL, '[)'), %s, 'a_validar', %s, "
+            "'pendente_validacao', %s)",
+            (uf, modal, _FONTE_COMPILADA, carga_id),
         )
 
     for nome, valor in (

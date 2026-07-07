@@ -28,30 +28,35 @@ from giva.decisao.interpretador import (
 
 # ---------------------------------------------------------------------------
 # DT-01 — status_ncm
-# Entradas: codigo_existe (bool) · periodo_cobre_vigente (bool | None)
-#           · tem_correlacao (bool)
+# Entradas: codigo_ausente (bool) · codigo_existe (bool)
+#           · periodo_cobre_vigente (bool | None) · tem_correlacao (bool)
 # ---------------------------------------------------------------------------
 DT01_STATUS_NCM = TabelaDecisao(
     nome="DT-01_status_ncm",
     versao="1.0",
     regras=(
-        Regra(
+        Regra(  # NCM branco/00000000 — ausente, não inexistente (doc 04 §3)
             numero=1,
+            quando={"codigo_ausente": Igual(True)},
+            entao={"status_ncm": "ncm_ausente"},
+        ),
+        Regra(
+            numero=2,
             quando={"codigo_existe": Igual(False), "tem_correlacao": Igual(True)},
             entao={"status_ncm": "codigo_alterado_pela_revisao_sh"},
         ),
         Regra(
-            numero=2,
+            numero=3,
             quando={"codigo_existe": Igual(False)},
             entao={"status_ncm": "codigo_inexistente"},
         ),
         Regra(
-            numero=3,
+            numero=4,
             quando={"codigo_existe": Igual(True), "periodo_cobre_vigente": Igual(True)},
             entao={"status_ncm": "ok"},
         ),
         Regra(  # catch-all: existe, mas o período antecede a redação vigente
-            numero=4,
+            numero=5,
             quando={"codigo_existe": Qualquer()},
             entao={"status_ncm": "descricao_vigente_periodo_nao_carregado"},
         ),
