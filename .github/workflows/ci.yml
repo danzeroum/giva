@@ -1,0 +1,104 @@
+# CI — estágios: lint/tipos → SAST/deps → unidade+integração → build.
+# DoD: estática/SAST sem achados altos; complexidade ≤ 10; migration reprodutível do zero.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-tipos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff mypy
+      - name: ruff (lint + complexidade ≤ 10)
+        run: ruff check .
+      - name: mypy (strict nos módulos fiscais — erro de tipo vira erro fiscal)
+        run: mypy src/giva/config.py src/giva/decisao src/giva/ncm src/giva/aliquota src/giva/categoria src/giva/similaridade src/giva/pipeline src/giva/saida src/giva/worker src/giva/api src/giva/rotinas
+
+  sast-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install bandit pip-audit vulture
+      - name: bandit (SAST — falha em severidade alta)
+        run: bandit -r src -ll
+      - name: pip-audit (vulnerabilidades em dependências)
+        run: pip-audit || true  # aviso enquanto não há lockfile pinado
+      - name: vulture (código morto)
+        run: vulture src --min-confidence 80 || true
+
+  testes:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: giva
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/giva
+      DADOS_DIR: /tmp/giva-dados-ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      # Executa o SQL real das migrations: valida btree_gist, as exclusion
+      # constraints, as FKs de categoria e o INSERT do seed (0002).
+      - name: alembic upgrade head (SQL das migrations no banco)
+        run: alembic upgrade head
+      # Reprodutibilidade do zero (RNF-04): derruba tudo e reconstrói do vazio.
+      - name: alembic downgrade base && upgrade head
+        run: alembic downgrade base && alembic upgrade head
+      - name: pytest (unidade+integração — o teste de sistema roda só à noite)
+        run: pytest -q -m "not sistema" --cov=src/giva
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint-tipos, sast-deps, testes]
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker build (imagem única — papéis por comando)
+        run: docker build -t giva:ci .
+
+  # Front-end (ADR-06): lint (eslint) + typecheck (tsc) + build (vite).
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: eslint
+        run: npm run lint
+      - name: tsc (typecheck)
+        run: npm run typecheck
+      - name: vite build
+        run: npm run build

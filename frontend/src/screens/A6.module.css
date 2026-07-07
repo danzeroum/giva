@@ -1,0 +1,265 @@
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--pad-page);
+  animation: fadeup 0.25s ease;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.voltar {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 12.5px;
+  padding: 0;
+  margin-bottom: 6px;
+}
+
+.h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text);
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin: 4px 0 0;
+}
+
+/* Baixar = ação de sucesso (Verde) — concluir o fluxo. */
+.baixar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--success);
+  color: var(--success-ink);
+  border: none;
+  border-radius: var(--r-btn);
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -12px rgba(63, 182, 139, 0.7);
+}
+
+.baixar:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.baixar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.disclaimer {
+  margin-bottom: 12px;
+}
+
+/* abas estilo sheet-tab */
+.tabs {
+  display: flex;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-soft);
+  border-radius: 8px 8px 0 0;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tabAtiva {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.sheet {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.scroll {
+  overflow: auto;
+  max-height: 60vh;
+}
+
+.grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12.5px;
+  white-space: nowrap;
+  min-width: 100%;
+}
+
+.th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.thEnr {
+  color: var(--accent);
+}
+
+.linhaClicavel {
+  cursor: pointer;
+}
+
+.td {
+  background: var(--rowbg, var(--card));
+  padding: 8px 10px;
+  vertical-align: middle;
+  border-right: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text);
+}
+
+.rodape {
+  padding: 9px 14px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+}
+
+/* Leia-me */
+.leiame {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.leiame .card:first-child {
+  grid-row: span 2;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+  padding: 16px 18px;
+}
+
+.h2 {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.legGrupo {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.legGrupo:first-of-type {
+  border-top: none;
+}
+
+.legDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-top: 3px;
+  flex: none;
+}
+
+.legGrupo strong {
+  text-transform: capitalize;
+  font-size: 13px;
+}
+
+.legGrupo ul {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  font-size: 12.5px;
+  color: var(--text-soft);
+}
+
+.legGrupo li {
+  margin: 2px 0;
+}
+
+.ressalvas {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.ressalvas li + li {
+  margin-top: 8px;
+}
+
+.processo {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  margin: 0 0 8px;
+}
+
+.bases {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12.5px;
+  color: var(--text-soft);
+}
+
+.baseDemo {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--demo-tx);
+  background: var(--demo-bg);
+  border: 1px solid var(--demo-line);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.notaBases {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin: 10px 0 0;
+}
+
+.resumo {
+  margin-top: 18px;
+}
