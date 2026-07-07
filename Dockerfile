@@ -5,6 +5,7 @@ COPY pyproject.toml ./
 COPY src/ src/
 COPY migrations/ migrations/
 COPY alembic.ini ./
+COPY dados/ dados/
 # src/ precisa existir ANTES do install — build baseado em pyproject empacota o
 # código-fonte presente.
 RUN pip install --no-cache-dir .

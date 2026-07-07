@@ -7,13 +7,19 @@ novo numa DT futura quebre o CI em vez de aparecer sem cor/rótulo na interface.
 
 `farol_de`/`pior_status` também leem esse mesmo JSON — é o único lugar onde a
 cor de um status é decidida, reusado pelo `MontadorSaida` (formatação do
-`.xlsx`) para não duplicar a paleta que já existe no front.
+`.xlsx`) para não duplicar a paleta que já existe no front. A leitura é feita
+de `data/statuses.json`, uma cópia empacotada dentro do próprio pacote `giva`
+(ver `pyproject.toml: [tool.setuptools.package-data]`) — não do arquivo em
+`frontend/` diretamente, que não existe mais uma vez que `giva` é instalado
+fora do checkout (ex.: `pip install .` num container Docker). O teste de
+contrato garante que as duas cópias nunca divirjam.
 """
 
 from __future__ import annotations
 
 import json
 from collections.abc import Iterable
+from functools import lru_cache
 from pathlib import Path
 
 from giva.decisao.tabelas import (
@@ -28,10 +34,7 @@ _COLUNAS_STATUS = frozenset(
     {"status_ncm", "status_aliquota", "status_descricao", "status_linha"}
 )
 
-_JSON_FRONT = (
-    Path(__file__).resolve().parents[3]
-    / "frontend" / "src" / "data" / "statuses.json"
-)
+_JSON_FRONT = Path(__file__).resolve().parent / "data" / "statuses.json"
 _SEVERIDADE = {"verde": 1, "amarelo": 2, "vermelho": 3}
 
 
@@ -47,6 +50,7 @@ def statuses_possiveis() -> set[str]:
     return valores
 
 
+@lru_cache(maxsize=1)
 def _mapa_farol() -> dict[str, str]:
     bruto: dict[str, dict[str, str]] = json.loads(_JSON_FRONT.read_text(encoding="utf-8"))
     return {chave: info["farol"] for chave, info in bruto.items()}

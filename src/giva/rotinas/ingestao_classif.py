@@ -32,10 +32,12 @@ from giva.ncm.carga import carregar_posicoes, sha256_arquivo
 from giva.ncm.staging import carregar_staging, diff_carga, promover_carga
 
 # Snapshot oficial versionado no repositório (raiz do projeto / dados/classif).
-_SNAPSHOT_PADRAO = (
-    Path(__file__).resolve().parents[3]
-    / "dados" / "classif" / "nomenclatura_vigente_2026-07-02.json"
-)
+# Relativo ao cwd (não a __file__): depois de `pip install .` este módulo roda
+# de dentro de site-packages, de onde não há como subir até a raiz do projeto
+# — por isso a rotina espera ser chamada a partir da raiz (dev local: raiz do
+# checkout; container: WORKDIR /app, onde o Dockerfile também copia dados/).
+# Sem arquivo no cwd esperado, cai no erro explícito abaixo (não um traceback).
+_SNAPSHOT_PADRAO = Path("dados/classif/nomenclatura_vigente_2026-07-02.json")
 
 
 def _data_coleta(doc: dict[str, Any], caminho: Path) -> date:
