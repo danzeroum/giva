@@ -81,6 +81,16 @@ def test_ncm_e_autoritativo_mesmo_com_descricao_divergente():
     assert r.categoria == "Peça de máquina"  # NCM tem prioridade
     assert r.confianca == "alta"
     assert r.proveniencia.caminho == "ncm"
+    assert r.conflito_descricao is True  # descrição diverge do NCM → divergência forte
+
+
+def test_sem_conflito_quando_ncm_e_descricao_concordam():
+    repo = FakeRepo(
+        ncm=[("8482", "Peça de máquina")],
+        palavra=[("rolamento", "Peça de máquina")],
+    )
+    r = Categorizador(repo).categorizar("84821000", "Rolamento de esferas")
+    assert r.conflito_descricao is False
 
 
 def test_so_descricao_ncm_presente_sem_regra_confianca_alta():

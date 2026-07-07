@@ -39,7 +39,6 @@ from giva.pipeline.leitor import ler_planilha
 from giva.pipeline.modelo import LinhaLote
 from giva.pipeline.pipeline import Pipeline
 from giva.similaridade.avaliador import AvaliadorSimilaridade
-from giva.similaridade.repositorio_sql import RepositorioParametrosSQL
 
 
 def _fmt_aliquota(linha: LinhaLote) -> str:
@@ -93,7 +92,7 @@ def main(argv: list[str]) -> int:
         EtapaNCM(ResolutorNCM(RepositorioNCMSQL(con))),
         EtapaAliquota(ResolutorAliquota(RepositorioAliquotaSQL(con))),
         EtapaCategoria(Categorizador(RepositorioCategoriaSQL(con))),
-        EtapaSimilaridade(AvaliadorSimilaridade(RepositorioParametrosSQL(con))),
+        EtapaSimilaridade(AvaliadorSimilaridade()),
     ])
     linhas = pipe.processar(lote.linhas)
 

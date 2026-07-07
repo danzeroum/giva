@@ -59,6 +59,10 @@ class ResultadoCategoria:
     proveniencia: ProvenienciaCategoria
     motivo_indefinido: str | None = None  # sem_match | ambiguo (só quando Indefinido)
     sugestivo: bool = True  # sugestão operacional, não classificação fiscal (RN2)
+    # True quando o NCM aponta uma categoria e a descrição aponta OUTRA — sinal
+    # de divergência de descrição (ex.: NCM de rolamento + descrição 'martelo').
+    # É o que alimenta o status_descricao (divergência forte) na EtapaSimilaridade.
+    conflito_descricao: bool = False
 
 
 class RepositorioCategoria(Protocol):
@@ -118,7 +122,10 @@ class Categorizador:
         if cat_ncm is not None:
             if cat_ncm in distintas:  # NCM e descrição concordam
                 return self._resultado(cat_ncm, "alta", versao, "ncm+descricao")
-            return self._resultado(cat_ncm, "alta", versao, "ncm")  # NCM decide (Alta)
+            # NCM decide (Alta). Se a descrição apontou OUTRA categoria, há conflito
+            # → sinaliza divergência de descrição (não rebaixa a confiança, Opção B).
+            conflito = bool(distintas)
+            return self._resultado(cat_ncm, "alta", versao, "ncm", conflito=conflito)
 
         if len(distintas) == 1:  # só descrição
             # NCM presente mas sem regra → sinal único forte (Alta);
@@ -130,13 +137,15 @@ class Categorizador:
         return self._indefinido("sem_match", versao)  # nenhuma pista
 
     def _resultado(
-        self, categoria: str, confianca: str, versao: str, caminho: str
+        self, categoria: str, confianca: str, versao: str, caminho: str,
+        *, conflito: bool = False,
     ) -> ResultadoCategoria:
         tabela = "regras_excecao" if caminho == "excecao" else _tabela_do_caminho(caminho)
         return ResultadoCategoria(
             categoria=categoria,
             confianca=confianca,
             proveniencia=ProvenienciaCategoria(f"{tabela}@{versao}", versao, caminho),
+            conflito_descricao=conflito,
         )
 
     def _indefinido(self, motivo: str, versao: str) -> ResultadoCategoria:

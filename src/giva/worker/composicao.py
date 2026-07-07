@@ -25,7 +25,6 @@ from giva.pipeline.etapas import (
 )
 from giva.pipeline.pipeline import Pipeline
 from giva.similaridade.avaliador import AvaliadorSimilaridade
-from giva.similaridade.repositorio_sql import RepositorioParametrosSQL
 
 
 def pipeline_padrao(con: Connection[Any], *, aceita_nao_validada: bool = False) -> Pipeline:
@@ -39,6 +38,6 @@ def pipeline_padrao(con: Connection[Any], *, aceita_nao_validada: bool = False) 
                 )
             ),
             EtapaCategoria(Categorizador(RepositorioCategoriaSQL(con))),
-            EtapaSimilaridade(AvaliadorSimilaridade(RepositorioParametrosSQL(con))),
+            EtapaSimilaridade(AvaliadorSimilaridade()),
         ]
     )

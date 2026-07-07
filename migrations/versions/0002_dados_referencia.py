@@ -65,6 +65,7 @@ REGRAS_NCM = [
     ("2207", "Produto químico"),         # álcool etílico (uso industrial)
     ("3923", "Material de embalagem"),   # embalagem de plástico
     ("82", "Ferramentas"),               # cap. 82 — ferramentas manuais
+    ("8481", "Material de manutenção"),  # torneiras/válvulas de uso geral
     ("9017", "Material de escritório e informática"),  # régua/desenho
     ("9603", "Material de limpeza"),     # vassoura/escova
     ("9608", "Material de escritório e informática"),  # canetas
@@ -92,7 +93,7 @@ _PALAVRAS = {
     ],
     "Ferramentas": [
         "chave de fenda", "chave allen", "mandril", "alicate",
-        "lamina", "chave de impacto",
+        "lamina", "chave de impacto", "martelo",
     ],
     "Material de limpeza": [
         "papel higienico", "toalha de papel", "sabonete", "detergente",

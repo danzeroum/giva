@@ -49,21 +49,20 @@ promovida (`scripts/comparar_gabarito.py`):
 
 - **Alíquota: 100%** — histórico das 11 UFs do playbook com as viradas
   (RJ/PR/RS/GO/CE) + REQUER VALIDAÇÃO MANUAL para UFs fora do seed (RN4).
+- **Divergência: 100%** — decidida por **conflito de categoria** NCM×descrição
+  (DT-03 v2): pega o caso MARTELO↔rolamento e não gera falso positivo nos
+  produtos corretos. Substituiu o Jaccard, que dava ~6% (termos tarifários
+  genéricos). O score textual fica só como informação na proveniência; a
+  semântica/IA continua reservada para a v2 (PRD §12.5).
 - **Confiança: 92%** — regra Opção B (sinal único forte → Alta; NCM autoritativo;
   NCM ausente → Média; Indefinido → Baixa).
-- **Categoria: ~78%** — refinável ampliando as regras de faixa NCM/palavra
+- **Categoria: ~79%** — refinável ampliando as regras de faixa NCM/palavra
   (backlog: casos de fronteira como HDMI, placa cega, grafeno).
-- **Divergência: ~6% (limite conhecido)** — a descrição oficial passou a ser a de
-  **subposição** (mais estável), mas ainda é um termo tarifário formal
-  (`- Partes`, `-- Outros`, `- Disjuntores`) que dá **Jaccard 0** contra o nome
-  comercial do produto. A similaridade por sobreposição de tokens não replica o
-  julgamento humano ("este NCM cabe neste produto"). Precisa de sinal melhor:
-  (i) **conflito de categoria** NCM×descrição como heurística v1 (pega o caso
-  MARTELO↔rolamento) ou (ii) **IA/semântica** (v2, previsto no PRD §12.5).
 
 Gaps de código fechados: leitor `.xlsx`; NCM ausente/branco → categoriza por
 descrição e resolve alíquota; histórico decenal de alíquotas; confiança Opção B;
-descrição oficial de subposição (`ncm_posicao`) + thresholds recalibrados.
+descrição oficial de subposição (`ncm_posicao`); divergência por conflito de
+categoria (DT-03 v2).
 
 ## Fase 5 — Operação da base (em andamento)
 - ✅ **Ingestão real do Classif**: `python -m giva.rotinas.ingestao_classif`

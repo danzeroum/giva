@@ -3,7 +3,6 @@
 from giva.similaridade.avaliador import (
     AvaliadorSimilaridade,
     ProvenienciaSimilaridade,
-    RepositorioParametros,
     ResultadoSimilaridade,
 )
 from giva.similaridade.normalizacao import (
@@ -14,7 +13,6 @@ from giva.similaridade.normalizacao import (
 __all__ = [
     "AvaliadorSimilaridade",
     "ProvenienciaSimilaridade",
-    "RepositorioParametros",
     "ResultadoSimilaridade",
     "normalizar_descricao",
     "score_similaridade",
