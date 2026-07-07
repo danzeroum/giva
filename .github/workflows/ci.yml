@@ -81,6 +81,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: docker build (imagem única — papéis por comando)
         run: docker build -t giva:ci .
+      # Smoke test: `docker build` só prova que a imagem compila, não que os
+      # dados empacotados (fora de src/*.py) sobreviveram ao `pip install .`
+      # não-editável — foi assim que o bug do path de statuses.json (fixo em
+      # dev/CI, quebrado no container) chegou em produção sem o CI acusar.
+      - name: smoke test (dados empacotados existem dentro do container)
+        run: |
+          docker run --rm giva:ci python -c "
+          from giva.decisao.statuses import farol_de
+          from giva.rotinas.ingestao_classif import _SNAPSHOT_PADRAO
+          assert farol_de('ok') == 'verde', 'statuses.json não carregou do pacote instalado'
+          assert _SNAPSHOT_PADRAO.exists(), f'{_SNAPSHOT_PADRAO} não encontrado na imagem'
+          print('smoke test OK')
+          "
 
   # Front-end (ADR-06): lint (eslint) + typecheck (tsc) + build (vite).
   frontend:
