@@ -28,7 +28,7 @@ from typing import Any
 import psycopg
 
 from giva.config import dsn_psycopg
-from giva.ncm.carga import sha256_arquivo
+from giva.ncm.carga import carregar_posicoes, sha256_arquivo
 from giva.ncm.staging import carregar_staging, diff_carga, promover_carga
 
 # Snapshot oficial versionado no repositório (raiz do projeto / dados/classif).
@@ -51,17 +51,22 @@ def _data_coleta(doc: dict[str, Any], caminho: Path) -> date:
     return datetime.fromtimestamp(caminho.stat().st_mtime, tz=UTC).date()
 
 
-def ingerir_staging(con: psycopg.Connection[Any], caminho: Path) -> tuple[int, int]:
-    """Carrega o snapshot de `caminho` para a sala de espera (staging).
-    Devolve (carga_id, n_ncm). Não faz commit."""
+def ingerir_staging(
+    con: psycopg.Connection[Any], caminho: Path
+) -> tuple[int, int, int]:
+    """Carrega o snapshot de `caminho` para a sala de espera (staging) e, direto,
+    as subposições de 6 dígitos (rótulos estáveis, não passam pela revisão).
+    Devolve (carga_id, n_ncm, n_posicoes). Não faz commit."""
     doc: dict[str, Any] = json.loads(caminho.read_text(encoding="utf-8"))
-    return carregar_staging(
+    carga_id, n = carregar_staging(
         con,
         doc,
         arquivo=str(caminho),
         hash_arquivo=sha256_arquivo(str(caminho)),
         data_coleta=_data_coleta(doc, caminho),
     )
+    n_pos = carregar_posicoes(con, doc, carga_id)
+    return carga_id, n, n_pos
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -74,12 +79,12 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     with psycopg.connect(dsn_psycopg()) as con:
-        carga_id, n = ingerir_staging(con, caminho)
+        carga_id, n, n_pos = ingerir_staging(con, caminho)
         diff = diff_carga(con, carga_id)
         print(
-            f"carga {carga_id} em staging: {n} códigos de {caminho.name} | "
-            f"vs produção: +{diff.novos} novos, -{diff.removidos} removidos, "
-            f"~{diff.alterados} alterados"
+            f"carga {carga_id} em staging: {n} códigos ({n_pos} subposições) de "
+            f"{caminho.name} | vs produção: +{diff.novos} novos, "
+            f"-{diff.removidos} removidos, ~{diff.alterados} alterados"
         )
         if promover:
             promovidos = promover_carga(con, carga_id, por="ingestao-cli")

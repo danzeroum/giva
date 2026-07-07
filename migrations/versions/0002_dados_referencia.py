@@ -58,7 +58,6 @@ REGRAS_NCM = [
     ("4818", "Material de limpeza"),     # higiênico/toalha
     ("3401", "Material de limpeza"),     # sabões
     ("3402", "Material de limpeza"),     # tensoativos
-    ("28", "Produto químico"),           # cap. 28 — químicos inorgânicos
     ("32", "Produto químico"),           # tintas/pigmentos
     ("35", "Produto químico"),           # colas
     ("38", "Produto químico"),           # químicos diversos
@@ -229,9 +228,12 @@ def upgrade() -> None:
             (uf, modal, _FONTE_COMPILADA, carga_id),
         )
 
+    # Limiares da divergência de descrição (RF-24) — calibrados com a amostra
+    # real (planilha-teste/gabarito): a descrição oficial passou a ser a de
+    # subposição (mais descritiva), então a régua desce de 0,85/0,60.
     for nome, valor in (
-        ("t_ok", 0.85),
-        ("t_rev", 0.60),
+        ("t_ok", 0.34),
+        ("t_rev", 0.15),
         ("categoria_versao_vigente", VERSAO),
     ):
         con.exec_driver_sql(

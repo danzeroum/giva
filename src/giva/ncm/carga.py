@@ -15,7 +15,7 @@ from typing import Any
 
 from psycopg import Connection
 
-from giva.ncm.classif import parsear_registros
+from giva.ncm.classif import parsear_posicoes, parsear_registros
 
 _SQL_CARGA = """
     INSERT INTO carga
@@ -76,3 +76,18 @@ def carregar_snapshot_vigente(
             ],
         )
     return carga_id, len(registros)
+
+
+def carregar_posicoes(
+    con: Connection[Any], doc: Mapping[str, Any], carga_id: int
+) -> int:
+    """Full refresh de `ncm_posicao` (subposições de 6 dígitos) a partir de `doc`,
+    associadas à `carga_id`. Não faz commit. Devolve o número de subposições."""
+    posicoes = list(parsear_posicoes(doc))
+    with con.cursor() as cur:
+        cur.execute("DELETE FROM ncm_posicao")
+        cur.executemany(
+            "INSERT INTO ncm_posicao (prefixo, descricao, carga_id) VALUES (%s, %s, %s)",
+            [(prefixo, descricao, carga_id) for prefixo, descricao in posicoes],
+        )
+    return len(posicoes)

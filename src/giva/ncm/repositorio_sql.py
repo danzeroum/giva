@@ -38,6 +38,8 @@ _SQL_VIGENTE = """
 
 _SQL_CORRELACAO = "SELECT 1 FROM ncm_correlacao WHERE codigo_anterior = %(codigo)s LIMIT 1"
 
+_SQL_POSICAO = "SELECT descricao FROM ncm_posicao WHERE prefixo = %(prefixo)s"
+
 
 class RepositorioNCMSQL:
     """Implementação de `RepositorioNCM` sobre uma conexão psycopg."""
@@ -79,6 +81,12 @@ class RepositorioNCMSQL:
             data_coleta=r["data_coleta"],
             carga_id=r["carga_id"],
         )
+
+    def buscar_posicao(self, prefixo6: str) -> str | None:
+        with self._con.cursor() as cur:
+            cur.execute(_SQL_POSICAO, {"prefixo": prefixo6})
+            row = cur.fetchone()
+        return str(row[0]) if row is not None else None
 
     def existe_correlacao(self, codigo: str) -> bool:
         with self._con.cursor() as cur:

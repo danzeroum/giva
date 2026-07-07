@@ -49,17 +49,21 @@ promovida (`scripts/comparar_gabarito.py`):
 
 - **Alíquota: 100%** — histórico das 11 UFs do playbook com as viradas
   (RJ/PR/RS/GO/CE) + REQUER VALIDAÇÃO MANUAL para UFs fora do seed (RN4).
-- **Categoria: ~77%** — refinável ampliando as regras de faixa NCM/palavra
-  (backlog: casos de fronteira como HDMI, placa cega).
-- **Confiança / Divergência: baixo casamento** — divergências de *calibração*,
-  não bugs: (a) a confiança segue a definição do doc 04 §2.3 (Alta só com NCM
-  **e** descrição concordando), enquanto o gabarito trata sinal único como Alta;
-  (b) a similaridade é Jaccard sobre a descrição oficial (terse) → precisa da
-  recalibração de thresholds já prevista (PRD §5) e da descrição de POSIÇÃO/TIPI
-  por período (base histórica).
+- **Confiança: 92%** — regra Opção B (sinal único forte → Alta; NCM autoritativo;
+  NCM ausente → Média; Indefinido → Baixa).
+- **Categoria: ~78%** — refinável ampliando as regras de faixa NCM/palavra
+  (backlog: casos de fronteira como HDMI, placa cega, grafeno).
+- **Divergência: ~6% (limite conhecido)** — a descrição oficial passou a ser a de
+  **subposição** (mais estável), mas ainda é um termo tarifário formal
+  (`- Partes`, `-- Outros`, `- Disjuntores`) que dá **Jaccard 0** contra o nome
+  comercial do produto. A similaridade por sobreposição de tokens não replica o
+  julgamento humano ("este NCM cabe neste produto"). Precisa de sinal melhor:
+  (i) **conflito de categoria** NCM×descrição como heurística v1 (pega o caso
+  MARTELO↔rolamento) ou (ii) **IA/semântica** (v2, previsto no PRD §12.5).
 
-Gaps de código fechados nesta rodada: leitor `.xlsx`; NCM ausente/branco →
-categoriza por descrição e resolve alíquota; histórico decenal de alíquotas.
+Gaps de código fechados: leitor `.xlsx`; NCM ausente/branco → categoriza por
+descrição e resolve alíquota; histórico decenal de alíquotas; confiança Opção B;
+descrição oficial de subposição (`ncm_posicao`) + thresholds recalibrados.
 
 ## Fase 5 — Operação da base (em andamento)
 - ✅ **Ingestão real do Classif**: `python -m giva.rotinas.ingestao_classif`

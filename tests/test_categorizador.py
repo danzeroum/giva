@@ -61,31 +61,43 @@ def test_ncm_e_descricao_concordam_confianca_alta():
     assert r.proveniencia.caminho == "ncm+descricao"
 
 
-def test_so_ncm_confianca_media():
+def test_so_ncm_confianca_alta():
+    # Opção B: sinal único forte (NCM) já dá Alta.
     repo = FakeRepo(ncm=[("8482", "Peça de máquina")])
     r = Categorizador(repo).categorizar("84821000", "descrição sem gatilho")
     assert r.categoria == "Peça de máquina"
-    assert r.confianca == "media"
+    assert r.confianca == "alta"
     assert r.proveniencia.caminho == "ncm"
 
 
-def test_conflito_ncm_versus_descricao_confianca_baixa():
+def test_ncm_e_autoritativo_mesmo_com_descricao_divergente():
+    # Opção B: o NCM decide com Alta; a divergência com a descrição é sinalizada
+    # à parte (similaridade), não rebaixa a confiança da categoria.
     repo = FakeRepo(
         ncm=[("8482", "Peça de máquina")],
         palavra=[("luva", "EPI")],
     )
     r = Categorizador(repo).categorizar("84821000", "Luva de proteção")
     assert r.categoria == "Peça de máquina"  # NCM tem prioridade
-    assert r.confianca == "baixa"
-    assert r.proveniencia.caminho == "ncm_conflito_descricao"
+    assert r.confianca == "alta"
+    assert r.proveniencia.caminho == "ncm"
 
 
-def test_so_descricao_confianca_media():
+def test_so_descricao_ncm_presente_sem_regra_confianca_alta():
+    # NCM presente mas sem regra de faixa → sinal único da descrição → Alta.
     repo = FakeRepo(palavra=[("caneta", "Material de escritório e informática")])
     r = Categorizador(repo).categorizar("99999999", "Caneta esferográfica azul")
     assert r.categoria == "Material de escritório e informática"
-    assert r.confianca == "media"
+    assert r.confianca == "alta"
     assert r.proveniencia.caminho == "descricao"
+
+
+def test_so_descricao_ncm_ausente_confianca_media():
+    # NCM ausente (branco/00000000) → categoria veio só do texto → Média.
+    repo = FakeRepo(palavra=[("cafe", "Alimentação")])
+    r = Categorizador(repo).categorizar(None, "Cafe em graos")
+    assert r.categoria == "Alimentação"
+    assert r.confianca == "media"
 
 
 def test_descricao_ambigua_vira_indefinido():

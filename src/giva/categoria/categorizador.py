@@ -106,21 +106,25 @@ class Categorizador:
             self._repo.buscar_por_ncm(ncm_util, versao) if ncm_util is not None else None
         )
         cats_desc = self._repo.buscar_por_palavra(descricao or "", versao)
-        return self._resolver(cat_ncm, cats_desc, versao)
+        return self._resolver(cat_ncm, cats_desc, versao, ncm_ausente=ncm_util is None)
 
     def _resolver(
-        self, cat_ncm: str | None, cats_desc: list[str], versao: str
+        self, cat_ncm: str | None, cats_desc: list[str], versao: str, *, ncm_ausente: bool
     ) -> ResultadoCategoria:
+        # Confiança (Opção B — decisão do escritório): um sinal FORTE único já
+        # dá Alta. O NCM é autoritativo — quando ele decide, a confiança é Alta
+        # (a divergência com a descrição é sinalizada à parte, pela similaridade).
         distintas = set(cats_desc)
         if cat_ncm is not None:
-            if cat_ncm in distintas:  # NCM e descrição concordam → confiança alta
+            if cat_ncm in distintas:  # NCM e descrição concordam
                 return self._resultado(cat_ncm, "alta", versao, "ncm+descricao")
-            if distintas:  # descrição aponta outra categoria → conflito de fronteira
-                return self._resultado(cat_ncm, "baixa", versao, "ncm_conflito_descricao")
-            return self._resultado(cat_ncm, "media", versao, "ncm")  # só NCM
+            return self._resultado(cat_ncm, "alta", versao, "ncm")  # NCM decide (Alta)
 
-        if len(distintas) == 1:  # sem regra de NCM, só descrição
-            return self._resultado(next(iter(distintas)), "media", versao, "descricao")
+        if len(distintas) == 1:  # só descrição
+            # NCM presente mas sem regra → sinal único forte (Alta);
+            # NCM ausente (branco/00000000) → categoria veio só do texto (Média).
+            conf = "media" if ncm_ausente else "alta"
+            return self._resultado(next(iter(distintas)), conf, versao, "descricao")
         if len(distintas) > 1:  # bateu com 2+ categorias, sem desempate
             return self._indefinido("ambiguo", versao)
         return self._indefinido("sem_match", versao)  # nenhuma pista
@@ -146,7 +150,7 @@ class Categorizador:
 
 def _tabela_do_caminho(caminho: str) -> str:
     """Qual tabela de regra decidiu, pela proveniência do caminho."""
-    if caminho in ("ncm+descricao", "ncm", "ncm_conflito_descricao"):
+    if caminho in ("ncm+descricao", "ncm"):
         return "regra_ncm_categoria"
     if caminho == "descricao":
         return "regra_palavra_categoria"

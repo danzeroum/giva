@@ -29,6 +29,9 @@ class FakeNCM:
     def buscar_redacao_periodo(self, codigo: str, periodo: date):
         return None  # sem histórico carregado no fake → cai na vigente
 
+    def buscar_posicao(self, prefixo6: str):
+        return None
+
     def buscar_vigente(self, codigo: str):
         if codigo == "84821000":
             return RedacaoVigente(

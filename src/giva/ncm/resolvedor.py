@@ -69,6 +69,11 @@ class RepositorioNCM(Protocol):
         se o histórico não cobrir aquela janela (cai para a vigente)."""
         ...
 
+    def buscar_posicao(self, prefixo6: str) -> str | None:
+        """Descrição da subposição (6 dígitos) — nível público estável usado como
+        referência quando não há a redação de época. None se não houver."""
+        ...
+
     def buscar_vigente(self, codigo: str) -> RedacaoVigente | None:
         """A redação vigente do `codigo` (8 dígitos, sem pontuação), ou None."""
         ...
@@ -117,6 +122,11 @@ class ResolutorNCM:
                 historica.descricao,
                 _proveniencia_periodo(decisao.proveniencia, historica),
             )
+
+        posicao = self._repo.buscar_posicao(codigo[:6])
+        if posicao is not None:  # subposição estável (gabarito: descrição de POSIÇÃO)
+            decisao = avaliar(DT01_STATUS_NCM, _entradas_historico())  # nível estável → ok
+            return ResultadoNCM(decisao.saidas["status_ncm"], posicao, None)
 
         vigente = self._repo.buscar_vigente(codigo)
         decisao = avaliar(DT01_STATUS_NCM, self._entradas(codigo, periodo, vigente))

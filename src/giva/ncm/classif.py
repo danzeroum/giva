@@ -95,3 +95,14 @@ def parsear_registros(doc: Mapping[str, Any]) -> Iterator[RegistroNCM]:
             ato_numero=_texto_ou_none(n.get("Numero_Ato_Ini")),
             ato_ano=_texto_ou_none(n.get("Ano_Ato_Ini")),
         )
+
+
+def parsear_posicoes(doc: Mapping[str, Any]) -> Iterator[tuple[str, str]]:
+    """Gera as **subposições de 6 dígitos** (prefixo, descrição). A descrição de
+    subposição é o nível público estável usado como referência da divergência
+    (ex.: 8482.10 → 'Rolamentos de esferas') — mais descritiva que a folha de 8
+    dígitos, que costuma ser um fragmento ('-- Outros')."""
+    for n in doc["Nomenclaturas"]:
+        digitos = apenas_digitos(str(n["Codigo"]))
+        if len(digitos) == 6:
+            yield digitos, str(n["Descricao"])

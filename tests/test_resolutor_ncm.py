@@ -22,6 +22,9 @@ class FakeRepo:
                 return r
         return None
 
+    def buscar_posicao(self, prefixo6):
+        return None  # sem subposição carregada no fake → cai na vigente
+
     def buscar_vigente(self, codigo):
         return self._vig.get(codigo)
 
