@@ -94,6 +94,25 @@ class CargaResposta(BaseModel):
     arquivo_bruto: str
     hash_arquivo: str
     data_coleta: date
+    status: str
     criado_em: datetime
     promovido_em: datetime | None
     promovido_por: str | None
+
+
+class DiffCargaResposta(BaseModel):
+    carga_id: int
+    total_producao: int
+    total_staging: int
+    novos: int
+    removidos: int
+    alterados: int
+    amostra_novos: list[str]
+    amostra_removidos: list[str]
+    amostra_alterados: list[str]
+
+
+class PromoverCargaResposta(BaseModel):
+    carga_id: int
+    status: str
+    promovidos: int

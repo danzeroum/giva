@@ -1,17 +1,18 @@
 """Ingestão da base de NCM vigente a partir do JSON do Classif/Siscomex
-(Fase 5 — operação da base). Substitui o seed de demonstração (migration 0003)
-pela base oficial completa.
+(Fase 5 — operação da base).
 
 Rodar:
 
-    python -m giva.rotinas.ingestao_classif [caminho.json]
+    python -m giva.rotinas.ingestao_classif [caminho.json] [--promover]
 
 Sem argumento, usa o snapshot versionado em `dados/classif/` (fonte oficial,
-público — não carrega dado de cliente, RNF-02). A operação é um **full refresh**
-do vigente numa única transação: registra a `carga` (proveniência: hash do
-arquivo + data de coleta, §3.2), limpa `ncm_vigente` e recarrega. `ncm_historico`
-e `ncm_correlacao` (redações de época/correlação SH) NÃO são tocados aqui — têm
-sua própria trilha (export histórico do Classif).
+público — não carrega dado de cliente, RNF-02).
+
+Por padrão a carga entra na **sala de espera** (`ncm_vigente_staging`,
+`carga.status='staging'`) e o comando mostra o diff contra a produção — nada
+afeta o motor até um humano promover (revisão antes de valer). Com `--promover`,
+a carga é promovida na hora (bootstrap/dev). `ncm_historico`/`ncm_correlacao`
+têm sua própria trilha (export histórico do Classif).
 
 Decisão GIVA §2: a fonte de NCM é o Classif (JSON máquina-legível), não a TIPI.
 """
@@ -27,7 +28,8 @@ from typing import Any
 import psycopg
 
 from giva.config import dsn_psycopg
-from giva.ncm.carga import carregar_snapshot_vigente, sha256_arquivo
+from giva.ncm.carga import sha256_arquivo
+from giva.ncm.staging import carregar_staging, diff_carga, promover_carga
 
 # Snapshot oficial versionado no repositório (raiz do projeto / dados/classif).
 _SNAPSHOT_PADRAO = (
@@ -49,13 +51,11 @@ def _data_coleta(doc: dict[str, Any], caminho: Path) -> date:
     return datetime.fromtimestamp(caminho.stat().st_mtime, tz=UTC).date()
 
 
-def ingerir(con: psycopg.Connection[Any], caminho: Path) -> tuple[int, int]:
-    """Full refresh de `ncm_vigente` a partir do snapshot em `caminho`.
-    Devolve (carga_id, n_ncm). Não faz commit — quem chama controla a transação."""
+def ingerir_staging(con: psycopg.Connection[Any], caminho: Path) -> tuple[int, int]:
+    """Carrega o snapshot de `caminho` para a sala de espera (staging).
+    Devolve (carga_id, n_ncm). Não faz commit."""
     doc: dict[str, Any] = json.loads(caminho.read_text(encoding="utf-8"))
-    with con.cursor() as cur:
-        cur.execute("DELETE FROM ncm_vigente")
-    return carregar_snapshot_vigente(
+    return carregar_staging(
         con,
         doc,
         arquivo=str(caminho),
@@ -66,14 +66,31 @@ def ingerir(con: psycopg.Connection[Any], caminho: Path) -> tuple[int, int]:
 
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
-    caminho = Path(args[0]) if args else _SNAPSHOT_PADRAO
+    promover = "--promover" in args
+    posicionais = [a for a in args if not a.startswith("--")]
+    caminho = Path(posicionais[0]) if posicionais else _SNAPSHOT_PADRAO
     if not caminho.exists():
         print(f"snapshot não encontrado: {caminho}", file=sys.stderr)
         return 2
+
     with psycopg.connect(dsn_psycopg()) as con:
-        carga_id, n = ingerir(con, caminho)
-        con.commit()
-    print(f"ncm_vigente recarregado: {n} códigos (carga_id={carga_id}) de {caminho.name}")
+        carga_id, n = ingerir_staging(con, caminho)
+        diff = diff_carga(con, carga_id)
+        print(
+            f"carga {carga_id} em staging: {n} códigos de {caminho.name} | "
+            f"vs produção: +{diff.novos} novos, -{diff.removidos} removidos, "
+            f"~{diff.alterados} alterados"
+        )
+        if promover:
+            promovidos = promover_carga(con, carga_id, por="ingestao-cli")
+            con.commit()
+            print(f"carga {carga_id} PROMOVIDA: {promovidos} códigos em produção.")
+        else:
+            con.commit()
+            print(
+                f"Revise e promova: POST /cargas/{carga_id}/promover (ou rode com "
+                f"--promover)."
+            )
     return 0
 
 

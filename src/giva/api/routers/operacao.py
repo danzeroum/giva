@@ -30,15 +30,24 @@ from giva.api.schemas.operacao import (
     CargaResposta,
     ContestacaoOperacaoResposta,
     CriarExcecaoRequest,
+    DiffCargaResposta,
     EncaminharContestacaoRequest,
     ExcecaoResposta,
     HistoricoParametroItem,
     ParametroResposta,
+    PromoverCargaResposta,
     UfResposta,
 )
 from giva.api.seguranca import UsuarioToken
 from giva.auditoria import registrar as registrar_auditoria
 from giva.categoria.repositorio_sql import RepositorioCategoriaSQL
+from giva.ncm.staging import (
+    CargaNaoEmStagingError,
+    CargaNaoEncontradaError,
+    diff_carga,
+    promover_carga,
+    rejeitar_carga,
+)
 
 router = APIRouter(tags=["operacao"])
 
@@ -297,17 +306,66 @@ def encaminhar_contestacao(
     return ContestacaoOperacaoResposta(**dict(zip(campos, linha, strict=True)))
 
 
-# --- B1: cargas (leitura apenas nesta fase — ver pendencias.md) --------------
+# --- B1: cargas — sala de espera (staging → diff → promover/rejeitar) --------
 
 
 @router.get("/cargas")
 def listar_cargas(usuario: _Operador, con: _Conexao) -> list[CargaResposta]:
     linhas = con.execute(
-        "SELECT id, fonte, arquivo_bruto, hash_arquivo, data_coleta, criado_em, "
-        "promovido_em, promovido_por FROM carga ORDER BY criado_em DESC"
+        "SELECT id, fonte, arquivo_bruto, hash_arquivo, data_coleta, status, "
+        "criado_em, promovido_em, promovido_por FROM carga ORDER BY criado_em DESC"
     ).fetchall()
     campos = (
-        "id", "fonte", "arquivo_bruto", "hash_arquivo", "data_coleta",
+        "id", "fonte", "arquivo_bruto", "hash_arquivo", "data_coleta", "status",
         "criado_em", "promovido_em", "promovido_por",
     )
     return [CargaResposta(**dict(zip(campos, linha, strict=True))) for linha in linhas]
+
+
+@router.get("/cargas/{carga_id}/diff")
+def diff_carga_rota(carga_id: int, usuario: _Operador, con: _Conexao) -> DiffCargaResposta:
+    """O que a carga em staging muda vs. a produção (revisão antes de promover)."""
+    try:
+        d = diff_carga(con, carga_id)
+    except CargaNaoEncontradaError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except CargaNaoEmStagingError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    return DiffCargaResposta(**vars(d))
+
+
+@router.post("/cargas/{carga_id}/promover")
+def promover_carga_rota(
+    carga_id: int, usuario: _Operador, con: _Conexao
+) -> PromoverCargaResposta:
+    """Promove a carga em staging: troca a produção pelo conteúdo revisado."""
+    try:
+        promovidos = promover_carga(con, carga_id, por=usuario.email)
+    except CargaNaoEncontradaError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except CargaNaoEmStagingError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    registrar_auditoria(
+        con, quem=usuario.email, acao="carga_promovida",
+        alvo=f"carga:{carga_id}", depois={"promovidos": promovidos},
+    )
+    con.commit()
+    return PromoverCargaResposta(carga_id=carga_id, status="promovida", promovidos=promovidos)
+
+
+@router.post("/cargas/{carga_id}/rejeitar")
+def rejeitar_carga_rota(
+    carga_id: int, usuario: _Operador, con: _Conexao
+) -> PromoverCargaResposta:
+    """Rejeita a carga em staging: descarta sem tocar a produção."""
+    try:
+        rejeitar_carga(con, carga_id, por=usuario.email)
+    except CargaNaoEncontradaError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except CargaNaoEmStagingError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    registrar_auditoria(
+        con, quem=usuario.email, acao="carga_rejeitada", alvo=f"carga:{carga_id}",
+    )
+    con.commit()
+    return PromoverCargaResposta(carga_id=carga_id, status="rejeitada", promovidos=0)

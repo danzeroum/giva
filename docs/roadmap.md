@@ -49,6 +49,11 @@ histórica** (Fase 2) — motor e UI se constroem em dias; a base é semanas.
   refresh do vigente numa transação. Substitui o seed de demonstração.
 - ✅ **Proteção de injeção de fórmula na prévia do front** (A6) — paridade com
   o `MontadorSaida` do backend.
+- ✅ **Sala de espera (revisão antes de valer)**: a ingestão entra em
+  `ncm_vigente_staging` (`carga.status='staging'`) sem tocar a produção; o
+  operador vê o **diff** (novos/removidos/alterados) e **promove** ou **rejeita**
+  (`GET /cargas/{id}/diff`, `POST /cargas/{id}/promover|rejeitar`, RBAC). A tela
+  B1 deixa de ser só leitura.
 - ⬜ **Histórico decenal das alíquotas modais** por UF (viradas 2023–2026) com
   **validação oficial UF a UF** (playbook) — promover `pendente_validacao` a
   `validada` com URL citável. É o que falta para a cobertura de produção.
