@@ -23,7 +23,7 @@ jobs:
       - name: ruff (lint + complexidade ≤ 10)
         run: ruff check .
       - name: mypy (strict nos módulos fiscais — erro de tipo vira erro fiscal)
-        run: mypy src/giva/config.py src/giva/decisao src/giva/ncm src/giva/aliquota src/giva/categoria src/giva/similaridade src/giva/pipeline src/giva/saida
+        run: mypy src/giva/config.py src/giva/decisao src/giva/ncm src/giva/aliquota src/giva/categoria src/giva/similaridade src/giva/pipeline src/giva/saida src/giva/worker src/giva/api
 
   sast-deps:
     runs-on: ubuntu-latest

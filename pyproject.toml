@@ -42,12 +42,19 @@ mypy_path = "src"
 strict = false
 
 [[tool.mypy.overrides]]        # strict onde erro de tipo vira erro fiscal
-module = ["giva.config", "giva.decisao.*", "giva.ncm.*", "giva.aliquota.*", "giva.categoria.*", "giva.similaridade.*", "giva.pipeline.*", "giva.saida.*"]
+module = ["giva.config", "giva.decisao.*", "giva.ncm.*", "giva.aliquota.*", "giva.categoria.*", "giva.similaridade.*", "giva.pipeline.*", "giva.saida.*", "giva.worker.*"]
 strict = true
 
 [[tool.mypy.overrides]]        # psycopg/fastapi/pydantic/jwt/argon2/openpyxl não têm stubs
 module = ["psycopg.*", "fastapi.*", "pydantic.*", "jwt.*", "argon2.*", "openpyxl.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]        # decorators do FastAPI vêm sem stub (Any); evita vazar
+module = ["giva.api.*"]        # disallow_*/warn_* de módulos strict para as rotas
+disallow_untyped_decorators = false
+disallow_any_generics = false
+warn_return_any = false
+disallow_subclassing_any = false
 
 [tool.coverage.run]
 source = ["src/giva"]

@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any
 
 from psycopg import Connection
+from psycopg.rows import dict_row
 
 # Palavras-chave são casadas sem acento/caixa: descrições reais vêm em grafias
 # mistas ("ÓLEO"/"oleo"/"Óleo"). As palavras no banco são gravadas já em
@@ -41,6 +42,27 @@ _SQL_POR_PALAVRA = """
      WHERE versao = %(versao)s
        AND position(palavra IN %(descricao)s) > 0
      ORDER BY categoria
+"""
+
+_SQL_LISTAR_EXCECOES = """
+    SELECT ncm, categoria, justificativa, versao, origem_tipo,
+           origem_contestacao_id, autor_id, criado_em
+      FROM regras_excecao
+     ORDER BY criado_em DESC
+"""
+
+_SQL_CRIAR_EXCECAO = """
+    INSERT INTO regras_excecao
+        (ncm, categoria, justificativa, versao,
+         origem_tipo, origem_contestacao_id, autor_id)
+    VALUES (%(ncm)s, %(categoria)s, %(justificativa)s, %(versao)s,
+            %(origem_tipo)s, %(origem_contestacao_id)s, %(autor_id)s)
+    ON CONFLICT (ncm, versao) DO UPDATE SET
+        categoria = EXCLUDED.categoria,
+        justificativa = EXCLUDED.justificativa,
+        origem_tipo = EXCLUDED.origem_tipo,
+        origem_contestacao_id = EXCLUDED.origem_contestacao_id,
+        autor_id = EXCLUDED.autor_id
 """
 
 
@@ -78,3 +100,36 @@ class RepositorioCategoriaSQL:
                 {"descricao": _sem_acento(descricao), "versao": versao},
             )
             return [str(r[0]) for r in cur.fetchall()]
+
+    def listar_excecoes(self) -> list[dict[str, Any]]:
+        """Todas as regras de exceção NCM→categoria (Bloco B — B4)."""
+        with self._con.cursor(row_factory=dict_row) as cur:
+            cur.execute(_SQL_LISTAR_EXCECOES)
+            return list(cur.fetchall())
+
+    def criar_excecao(
+        self,
+        *,
+        ncm: str,
+        categoria: str,
+        justificativa: str,
+        versao: str,
+        origem_tipo: str | None,
+        origem_contestacao_id: int | None,
+        autor_id: int,
+    ) -> None:
+        """Cria (ou substitui, se `(ncm, versao)` já existir) uma regra de
+        exceção — sempre vence as regras de faixa/palavra na resolução."""
+        with self._con.cursor() as cur:
+            cur.execute(
+                _SQL_CRIAR_EXCECAO,
+                {
+                    "ncm": ncm,
+                    "categoria": categoria,
+                    "justificativa": justificativa,
+                    "versao": versao,
+                    "origem_tipo": origem_tipo,
+                    "origem_contestacao_id": origem_contestacao_id,
+                    "autor_id": autor_id,
+                },
+            )

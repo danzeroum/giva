@@ -1,0 +1,111 @@
+/* GIVA — estilos globais. Tokens antes de tudo. */
+
+/* -----------------------------------------------------------------------------
+   Fontes V-VORTEX (self-hosted, sem CDN). Os arquivos .woff2 ainda NÃO entraram
+   nesta fase — quando entrarem, descomente os @font-face abaixo e coloque os
+   binários em src/assets/fonts/. Até lá, o fallback de sistema declarado nos
+   tokens (serif / sans-serif / monospace) assume. NÃO baixar fontes agora.
+
+   @font-face {
+     font-family: 'Newsreader';
+     src: url('../assets/fonts/Newsreader-Variable.woff2') format('woff2');
+     font-weight: 200 800; font-style: normal; font-display: swap;
+   }
+   @font-face {
+     font-family: 'Archivo';
+     src: url('../assets/fonts/Archivo-Variable.woff2') format('woff2');
+     font-weight: 100 900; font-style: normal; font-display: swap;
+   }
+   @font-face {
+     font-family: 'Fragment Mono';
+     src: url('../assets/fonts/FragmentMono-Regular.woff2') format('woff2');
+     font-weight: 400; font-style: normal; font-display: swap;
+   }
+----------------------------------------------------------------------------- */
+
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+}
+
+/* animações */
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fbar {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

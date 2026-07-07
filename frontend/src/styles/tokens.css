@@ -1,0 +1,211 @@
+/* =============================================================================
+   GIVA — Design System V-VORTEX v2.3 (fonte da verdade dos tokens)
+   -----------------------------------------------------------------------------
+   Nenhum hex de marca deve aparecer fora deste arquivo. Componentes consomem
+   apenas var(--token). Dois temas (LIGHT e DARK), resolvidos em três camadas:
+
+     1. :root                          -> LIGHT (padrão)
+     2. @media (prefers-color-scheme)  -> DARK automático quando o SO pede
+     3. :root[data-theme="dark|light"] -> override manual (toggle na UI vence)
+
+   Paleta V-VORTEX:
+     Safira  #0A1A2E · superfícies escuras #142A44 / #1E3A56
+     Papel   #F4F1EA · superfícies claras  #EDEFF3 / #DED8CC
+     Bronze  #B98A4B  (raro, semântico: ação primária, divergência, destaque)
+     Verde   #3FB68B  (sucesso)   ·   Terracota #C0563D  (erro)
+============================================================================= */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---- marca / semânticos (INVARIANTES entre temas) ---- */
+  --accent: #b98a4b;          /* Bronze — ação primária, alerta de divergência, destaque */
+  --accent-strong: #a5763b;   /* Bronze hover/pressed */
+  --accent-ink: #0a1a2e;      /* texto sobre Bronze (Safira) — contraste 5.67:1 AA */
+  --accent-soft: rgba(185, 138, 75, 0.16); /* preenchimento sutil (item ativo, faixas) */
+  --accent-line: rgba(185, 138, 75, 0.45);
+
+  --success: #3fb68b;         /* Verde */
+  --success-ink: #0a1a2e;     /* texto sobre Verde — contraste 6.90:1 AA */
+  --error: #c0563d;           /* Terracota */
+
+  /* ---- farol: DOT/BAR saturados (constantes; o rótulo carrega a informação,
+         a cor apenas reforça — ver StatusBadge). ---- */
+  --farol-verde-dot: #3fb68b;
+  --farol-amarelo-dot: #b98a4b;
+  --farol-vermelho-dot: #c0563d;
+  --farol-cinza-dot: #8a8f97;
+  --farol-verde-bar: #3fb68b;
+  --farol-amarelo-bar: #b98a4b;
+  --farol-vermelho-bar: #c0563d;
+  --farol-cinza-bar: #8a8f97;
+
+  /* ---- tipografia ----
+     Newsreader = títulos · Archivo = interface · Fragment Mono = códigos NCM,
+     alíquotas e dados tabulares. Sem CDN nesta fase: usamos fallback de sistema.
+     Os .woff2 self-hosted entram depois via @font-face em global.css. */
+  --font-serif: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Fragment Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+
+  /* ---- raio / espaço (invariantes) ---- */
+  --r-btn: 9px;
+  --r-card: 14px;
+  --r-pill: 20px;
+  --pad-page: 28px 34px 48px;
+  --row-confortavel: 11px 13px;
+  --row-compacto: 7px 12px;
+
+  /* =========================================================================
+     TEMA CLARO (padrão) — fundo Papel, texto Safira
+     ========================================================================= */
+  --bg: #f4f1ea;            /* Papel */
+  --surface: #edeff3;       /* superfície 1 (cards) */
+  --surface-2: #ded8cc;     /* superfície 2 (cabeçalhos de tabela, hover, raised) */
+  --surface-3: #e7e1d5;     /* barra lateral */
+  --card: #edeff3;
+
+  --text: #0a1a2e;          /* Safira */
+  --text-2: #16304f;        /* texto secundário forte */
+  --text-soft: #3a4a5c;
+  --text-muted: #5e6b7a;    /* rótulos — 4.79:1 sobre Papel (AA) */
+  --text-faint: #8a94a0;
+
+  --line: #d8d2c4;
+  --line-soft: #e6e1d6;
+
+  --focus: #1e6fb0;
+
+  /* farol — pares bg/tx verificados AA no tema claro (texto sobre bg):
+       verde   #1B6B4E / #E3F3EC = 5.56:1
+       amarelo #7A5A20 / #F5EAD6 = 5.32:1
+       vermelho#8A3826 / #F7E4DE = 6.40:1
+       cinza   #55524B / #E6E1D6 = 6.8:1 (aprox) */
+  --farol-verde-bg: #e3f3ec;
+  --farol-verde-tx: #1b6b4e;
+  --farol-amarelo-bg: #f5ead6;
+  --farol-amarelo-tx: #7a5a20;
+  --farol-vermelho-bg: #f7e4de;
+  --farol-vermelho-tx: #8a3826;
+  --farol-cinza-bg: #e6e1d6;
+  --farol-cinza-tx: #55524b;
+
+  /* demo — faixa de alerta persistente (usa a família Bronze, semântico) */
+  --demo-bg: #f3e7d1;
+  --demo-line: #e0c896;
+  --demo-tx: #6e5220;
+
+  --sh-card: 0 1px 2px rgba(10, 26, 46, 0.07);
+  --sh-btn: 0 8px 20px -12px rgba(185, 138, 75, 0.55);
+  --sh-pop: 0 24px 60px -28px rgba(10, 26, 46, 0.45);
+}
+
+/* Override CLARO explícito (vence o @media quando o usuário força "claro").
+   Mesmos valores de :root — declarado para o contrato pedido no brief. */
+:root[data-theme='light'] {
+  --bg: #f4f1ea;
+  --surface: #edeff3;
+  --surface-2: #ded8cc;
+  --surface-3: #e7e1d5;
+  --card: #edeff3;
+  --text: #0a1a2e;
+  --text-2: #16304f;
+  --text-soft: #3a4a5c;
+  --text-muted: #5e6b7a;
+  --text-faint: #8a94a0;
+  --line: #d8d2c4;
+  --line-soft: #e6e1d6;
+  --focus: #1e6fb0;
+  --farol-verde-bg: #e3f3ec;
+  --farol-verde-tx: #1b6b4e;
+  --farol-amarelo-bg: #f5ead6;
+  --farol-amarelo-tx: #7a5a20;
+  --farol-vermelho-bg: #f7e4de;
+  --farol-vermelho-tx: #8a3826;
+  --farol-cinza-bg: #e6e1d6;
+  --farol-cinza-tx: #55524b;
+  --demo-bg: #f3e7d1;
+  --demo-line: #e0c896;
+  --demo-tx: #6e5220;
+  --sh-card: 0 1px 2px rgba(10, 26, 46, 0.07);
+  --sh-btn: 0 8px 20px -12px rgba(185, 138, 75, 0.55);
+  --sh-pop: 0 24px 60px -28px rgba(10, 26, 46, 0.45);
+}
+
+/* =========================================================================
+   TEMA ESCURO — fundo Safira, texto Papel.
+   Bloco reutilizado em dois seletores: automático (SO) e forçado (toggle).
+   ========================================================================= */
+:root[data-theme='dark'] {
+  --bg: #0a1a2e;            /* Safira */
+  --surface: #142a44;      /* superfície 1 */
+  --surface-2: #1e3a56;    /* superfície 2 */
+  --surface-3: #10233a;    /* barra lateral */
+  --card: #142a44;
+
+  --text: #f4f1ea;         /* Papel */
+  --text-2: #edeff3;
+  --text-soft: #c6d0dc;
+  --text-muted: #9daab8;   /* rótulos — 6.14:1 sobre superfície (AA) */
+  --text-faint: #6e7e8f;
+
+  --line: #24405c;
+  --line-soft: #1b3450;
+
+  --focus: #6fb0e6;
+
+  /* farol — pares verificados AA no tema escuro (texto sobre bg):
+       verde   #6FD5AE / #163A2E = 7.03:1
+       amarelo #E0B979 / #3A2E17 = 7.19:1
+       vermelho#E8917B / #3A1E16 = 6.37:1
+       cinza   #B8C2CE / #253547 = 6.6:1 (aprox) */
+  --farol-verde-bg: #163a2e;
+  --farol-verde-tx: #6fd5ae;
+  --farol-amarelo-bg: #3a2e17;
+  --farol-amarelo-tx: #e0b979;
+  --farol-vermelho-bg: #3a1e16;
+  --farol-vermelho-tx: #e8917b;
+  --farol-cinza-bg: #253547;
+  --farol-cinza-tx: #b8c2ce;
+
+  --demo-bg: #33280f;
+  --demo-line: #5a4620;
+  --demo-tx: #e0b979;
+
+  --sh-card: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --sh-btn: 0 8px 22px -12px rgba(185, 138, 75, 0.5);
+  --sh-pop: 0 24px 60px -28px rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Só aplica o escuro automático quando NÃO há override manual "claro". */
+  :root:not([data-theme='light']) {
+    --bg: #0a1a2e;
+    --surface: #142a44;
+    --surface-2: #1e3a56;
+    --surface-3: #10233a;
+    --card: #142a44;
+    --text: #f4f1ea;
+    --text-2: #edeff3;
+    --text-soft: #c6d0dc;
+    --text-muted: #9daab8;
+    --text-faint: #6e7e8f;
+    --line: #24405c;
+    --line-soft: #1b3450;
+    --focus: #6fb0e6;
+    --farol-verde-bg: #163a2e;
+    --farol-verde-tx: #6fd5ae;
+    --farol-amarelo-bg: #3a2e17;
+    --farol-amarelo-tx: #e0b979;
+    --farol-vermelho-bg: #3a1e16;
+    --farol-vermelho-tx: #e8917b;
+    --farol-cinza-bg: #253547;
+    --farol-cinza-tx: #b8c2ce;
+    --demo-bg: #33280f;
+    --demo-line: #5a4620;
+    --demo-tx: #e0b979;
+    --sh-card: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --sh-btn: 0 8px 22px -12px rgba(185, 138, 75, 0.5);
+    --sh-pop: 0 24px 60px -28px rgba(0, 0, 0, 0.6);
+  }
+}

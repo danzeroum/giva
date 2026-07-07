@@ -1,0 +1,27 @@
+.box {
+  display: flex;
+  gap: 10px;
+  padding: 11px 13px;
+  background: var(--demo-bg);
+  border: 1px solid var(--demo-line);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  color: var(--demo-tx);
+}
+
+.icone {
+  flex: none;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.list li + li {
+  margin-top: 6px;
+}

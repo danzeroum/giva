@@ -1,0 +1,22 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 34px;
+  background: var(--demo-bg);
+  border-bottom: 1px solid var(--demo-line);
+  color: var(--demo-tx);
+  font-size: 12.5px;
+}
+
+.banner strong {
+  font-weight: 700;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--accent);
+  flex: none;
+}

@@ -13,8 +13,8 @@ from psycopg.rows import dict_row
 
 from giva.aliquota.resolvedor import VigenciaAliquota, VigenciaSobrepostaError
 
-_SQL_VIGENCIA = """
-    SELECT a.uf,
+_COLUNAS = """
+           a.uf,
            lower(a.vigencia)        AS vigencia_inicio,
            upper(a.vigencia)        AS vigencia_fim,
            a.aliquota_modal,
@@ -25,11 +25,45 @@ _SQL_VIGENCIA = """
            a.fonte_compilada,
            c.data_coleta,
            c.id                      AS carga_id
+"""
+
+_SQL_VIGENCIA = f"""
+    SELECT {_COLUNAS}
       FROM aliquota_icms_modal a
       JOIN carga c ON c.id = a.carga_id
      WHERE a.uf = %(uf)s
        AND a.vigencia @> %(periodo)s::date
 """
+
+_SQL_LISTAR_CORRENTES = f"""
+    SELECT {_COLUNAS}
+      FROM aliquota_icms_modal a
+      JOIN carga c ON c.id = a.carga_id
+     WHERE a.vigencia @> %(periodo)s::date
+     ORDER BY a.uf
+"""
+
+_SQL_ATUALIZAR_STATUS = """
+    UPDATE aliquota_icms_modal
+       SET status_validacao = %(status_validacao)s
+     WHERE uf = %(uf)s AND vigencia @> %(periodo)s::date
+"""
+
+
+def _vigencia(r: dict[str, Any]) -> VigenciaAliquota:
+    return VigenciaAliquota(
+        uf=r["uf"],
+        vigencia_inicio=r["vigencia_inicio"],
+        vigencia_fim=r["vigencia_fim"],
+        aliquota_modal=r["aliquota_modal"],
+        fecp_percentual=r["fecp_percentual"],
+        fecp_incidencia=r["fecp_incidencia"],
+        status_validacao=r["status_validacao"],
+        fonte_legal=r["fonte_legal"],
+        fonte_compilada=r["fonte_compilada"],
+        data_coleta=r["data_coleta"],
+        carga_id=r["carga_id"],
+    )
 
 
 class RepositorioAliquotaSQL:
@@ -44,17 +78,23 @@ class RepositorioAliquotaSQL:
             return None
         if len(linhas) > 1:  # a constraint EXCLUDE deveria impedir — invariante
             raise VigenciaSobrepostaError(uf, periodo, len(linhas))
-        r = linhas[0]
-        return VigenciaAliquota(
-            uf=r["uf"],
-            vigencia_inicio=r["vigencia_inicio"],
-            vigencia_fim=r["vigencia_fim"],
-            aliquota_modal=r["aliquota_modal"],
-            fecp_percentual=r["fecp_percentual"],
-            fecp_incidencia=r["fecp_incidencia"],
-            status_validacao=r["status_validacao"],
-            fonte_legal=r["fonte_legal"],
-            fonte_compilada=r["fonte_compilada"],
-            data_coleta=r["data_coleta"],
-            carga_id=r["carga_id"],
-        )
+        return _vigencia(linhas[0])
+
+    def listar_vigencias_correntes(self, periodo: date) -> list[VigenciaAliquota]:
+        """Todas as UFs com vigência cobrindo `periodo` (Bloco B — grid das
+        27 UFs para validação fiscal)."""
+        with self._con.cursor(row_factory=dict_row) as cur:
+            cur.execute(_SQL_LISTAR_CORRENTES, {"periodo": periodo})
+            return [_vigencia(r) for r in cur.fetchall()]
+
+    def atualizar_status_validacao(
+        self, uf: str, periodo: date, status_validacao: str
+    ) -> bool:
+        """Promove o `status_validacao` da vigência corrente da UF (Bloco B).
+        Devolve False se não há vigência cobrindo `periodo` — nada a atualizar."""
+        with self._con.cursor() as cur:
+            cur.execute(
+                _SQL_ATUALIZAR_STATUS,
+                {"uf": uf, "periodo": periodo, "status_validacao": status_validacao},
+            )
+            return bool(cur.rowcount > 0)
