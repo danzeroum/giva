@@ -13,8 +13,10 @@ from psycopg.rows import dict_row
 
 from giva.aliquota.resolvedor import VigenciaAliquota, VigenciaSobrepostaError
 
-_COLUNAS = """
-           a.uf,
+# Colunas repetidas nas duas consultas. Literais fixos (sem f-string/format e sem
+# entrada do usuário) — os valores variáveis entram só por parâmetro (%(...)s).
+_SQL_VIGENCIA = """
+    SELECT a.uf,
            lower(a.vigencia)        AS vigencia_inicio,
            upper(a.vigencia)        AS vigencia_fim,
            a.aliquota_modal,
@@ -25,18 +27,24 @@ _COLUNAS = """
            a.fonte_compilada,
            c.data_coleta,
            c.id                      AS carga_id
-"""
-
-_SQL_VIGENCIA = f"""
-    SELECT {_COLUNAS}
       FROM aliquota_icms_modal a
       JOIN carga c ON c.id = a.carga_id
      WHERE a.uf = %(uf)s
        AND a.vigencia @> %(periodo)s::date
 """
 
-_SQL_LISTAR_CORRENTES = f"""
-    SELECT {_COLUNAS}
+_SQL_LISTAR_CORRENTES = """
+    SELECT a.uf,
+           lower(a.vigencia)        AS vigencia_inicio,
+           upper(a.vigencia)        AS vigencia_fim,
+           a.aliquota_modal,
+           a.fecp_percentual,
+           a.fecp_incidencia,
+           a.status_validacao,
+           a.fonte_legal,
+           a.fonte_compilada,
+           c.data_coleta,
+           c.id                      AS carga_id
       FROM aliquota_icms_modal a
       JOIN carga c ON c.id = a.carga_id
      WHERE a.vigencia @> %(periodo)s::date
