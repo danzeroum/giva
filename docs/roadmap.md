@@ -29,18 +29,22 @@ histórica** (Fase 2) — motor e UI se constroem em dias; a base é semanas.
 5. **Conjunto-ouro (~50 linhas)** verificado contra fonte oficial como fixture
    de regressão; importar a planilha-teste + gabarito do pacote GIVA.
 
-## Fase 3 — API HTTP + worker de fila
-- Portar `src/giva/api/` (FastAPI, JWT, RBAC — ADR-07) e `src/giva/worker/`
-  (ADR-03) do enriquecedor, renomeando o pacote.
-- Fluxo: upload → validação → processamento com progresso → download + relatório.
+## Fase 3 — API HTTP + worker de fila ✅
+- `src/giva/api/` (FastAPI, JWT, RBAC — ADR-07) e `src/giva/worker/` (ADR-03).
+- Fluxo do analista verificado ponta a ponta: login → upload → processamento →
+  download `.xlsx`. Bloco B (validação de UF, parâmetros, exceções, contestações)
+  funcional. Migration 0004 (usuario/RBAC, contestação, progresso de lote).
 
-## Fase 4 — Frontend V-VORTEX
+## Fase 4 — Frontend V-VORTEX ✅
 - Tokens light + dark (Safira/Papel/Bronze), tipografia Newsreader/Archivo/
-  Fragment Mono.
-- Telas do fluxo do analista (upload → acompanhamento → revisão → prévia/download)
-  e da operação (validação por UF, parâmetros, exceções).
+  Fragment Mono (fallback de sistema; woff2 self-hosted entram depois).
+- Fluxo do analista completo (upload → acompanhamento → revisão → prévia/download)
+  com disclaimer da categoria; Bloco B como stubs marcados; modo demo.
+- `npm ci` + eslint + tsc + vite build verdes; job de CI dedicado.
 
-## Fase 5 — Operação da base
+## Fase 5 — Operação da base (próxima)
 - Rotinas de atualização (Classif semanal; modais mensal) com versionamento e
   revisão humana antes de promover a produção.
 - `versao_base` por execução (reprodutibilidade ponta a ponta).
+- Proteção de injeção de fórmula também na prévia do front (o `.xlsx`/`.csv`
+  baixado já é protegido no `MontadorSaida`).

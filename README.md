@@ -67,9 +67,15 @@ Sobe `db` → `migrate` (roda as migrations, sai) → `api` → `worker` → `fr
   regras + 27 UFs).
 - `docs/` — decisões, PRD adaptado e roadmap.
 
-## Estado atual (scaffold inicial)
-Motor de enriquecimento (normalização → NCM → alíquota → categoria →
-similaridade → saída), tabelas de decisão, migrations e seed das 27 UFs estão
-implementados e testáveis. **Próximas fases** (ver `docs/roadmap.md`): base
-histórica de NCM e alíquotas (o caminho crítico), API HTTP + worker de fila,
-frontend V-VORTEX.
+## Estado atual
+Verificado ponta a ponta (motor + base + API + worker + frontend):
+- **Motor de enriquecimento** — normalização → NCM (period-aware) → alíquota
+  modal → categoria (18 EFD) → similaridade → saída; tabelas de decisão.
+- **Base histórica** — NCM period-aware (`ncm_historico`), correlação SH 2022.
+- **API HTTP + worker** — fluxo do analista (login → upload → processamento →
+  download `.xlsx`) e operação (validação de UF, parâmetros, exceções).
+- **Frontend V-VORTEX** — light/dark, fluxo do analista completo, Bloco B stub.
+
+**Próxima fase** (ver `docs/roadmap.md`): operação da base — a base de produção
+de NCM (Classif) e o histórico decenal de alíquotas com validação oficial UF a
+UF (o seed atual é de 2026/demonstração, marcado como tal).
