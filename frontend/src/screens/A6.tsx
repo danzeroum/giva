@@ -21,6 +21,17 @@ const COLS_ENRIQUECIDAS: { chave: keyof LinhaLote['enriquecimento'] | 'status'; 
   { chave: 'confianca_categorizacao', rotulo: 'Confiança', mono: true },
 ]
 
+/** Neutraliza injeção de fórmula (CSV/Excel) numa célula original: um apóstrofo
+ * força a célula a texto. Mesmo critério do backend (`MontadorSaida._texto_seguro`)
+ * — o `.xlsx`/`.csv` baixado já é protegido lá; aqui protege a prévia e o CSV
+ * de demonstração gerado no cliente. Só se aplica às células ORIGINAIS (entrada
+ * do usuário); os campos enriquecidos são gerados pelo sistema. */
+const FORMULA_INJECAO = /^[=+@]|^-\d/
+function textoSeguro(valor: string | undefined): string {
+  const v = valor ?? ''
+  return FORMULA_INJECAO.test(v) ? `'${v}` : v
+}
+
 /** Download de demonstração: sem backend, monta um CSV client-side a partir das
  * linhas de demo para o botão "baixar" fazer algo real. */
 function baixarDemoCsv(linhas: LinhaLote[]): void {
@@ -28,7 +39,7 @@ function baixarDemoCsv(linhas: LinhaLote[]): void {
   const cabecalho = [...origCols, 'status', 'descricao_oficial_ncm', 'aliquota_icms_interna', 'categoria_macro', 'confianca_categorizacao']
   const escapar = (v: string) => `"${(v ?? '').replace(/"/g, '""')}"`
   const linhasCsv = linhas.map((l) =>
-    [...origCols.map((c) => l.originais[c]), l.status, l.enriquecimento.descricao_oficial_ncm, l.enriquecimento.aliquota_icms_interna, l.enriquecimento.categoria_macro, l.enriquecimento.confianca_categorizacao]
+    [...origCols.map((c) => textoSeguro(l.originais[c])), l.status, l.enriquecimento.descricao_oficial_ncm, l.enriquecimento.aliquota_icms_interna, l.enriquecimento.categoria_macro, l.enriquecimento.confianca_categorizacao]
       .map((v) => escapar(String(v ?? '')))
       .join(','),
   )
@@ -139,7 +150,7 @@ export function A6() {
                           onClick={() => toggleRow(l.numero)}
                         >
                           {colunasOriginais.map((c) => (
-                            <td key={c} className={`${styles.td} mono`}>{l.originais[c]}</td>
+                            <td key={c} className={`${styles.td} mono`}>{textoSeguro(l.originais[c])}</td>
                           ))}
                           {COLS_ENRIQUECIDAS.map((c) => {
                             if (c.chave === 'status') {

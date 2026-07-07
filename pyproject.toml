@@ -42,7 +42,7 @@ mypy_path = "src"
 strict = false
 
 [[tool.mypy.overrides]]        # strict onde erro de tipo vira erro fiscal
-module = ["giva.config", "giva.decisao.*", "giva.ncm.*", "giva.aliquota.*", "giva.categoria.*", "giva.similaridade.*", "giva.pipeline.*", "giva.saida.*", "giva.worker.*"]
+module = ["giva.config", "giva.decisao.*", "giva.ncm.*", "giva.aliquota.*", "giva.categoria.*", "giva.similaridade.*", "giva.pipeline.*", "giva.saida.*", "giva.worker.*", "giva.rotinas.*"]
 strict = true
 
 [[tool.mypy.overrides]]        # psycopg/fastapi/pydantic/jwt/argon2/openpyxl não têm stubs

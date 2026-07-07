@@ -42,9 +42,18 @@ histórica** (Fase 2) — motor e UI se constroem em dias; a base é semanas.
   com disclaimer da categoria; Bloco B como stubs marcados; modo demo.
 - `npm ci` + eslint + tsc + vite build verdes; job de CI dedicado.
 
-## Fase 5 — Operação da base (próxima)
-- Rotinas de atualização (Classif semanal; modais mensal) com versionamento e
+## Fase 5 — Operação da base (em andamento)
+- ✅ **Ingestão real do Classif**: `python -m giva.rotinas.ingestao_classif`
+  carrega `ncm_vigente` do snapshot oficial versionado (~10,5 mil NCMs), com
+  proveniência (hash + data de coleta declarada pelo próprio documento). Full
+  refresh do vigente numa transação. Substitui o seed de demonstração.
+- ✅ **Proteção de injeção de fórmula na prévia do front** (A6) — paridade com
+  o `MontadorSaida` do backend.
+- ⬜ **Histórico decenal das alíquotas modais** por UF (viradas 2023–2026) com
+  **validação oficial UF a UF** (playbook) — promover `pendente_validacao` a
+  `validada` com URL citável. É o que falta para a cobertura de produção.
+- ⬜ **NCM histórico/correlação** a partir do export "Alterações Históricas" do
+  Classif (hoje só o seed de demonstração da migration 0003).
+- ⬜ **`versao_base` por execução** (reprodutibilidade ponta a ponta — RN6).
+- ⬜ **Agendador** (APScheduler): Classif semanal, modais mensal, com item de
   revisão humana antes de promover a produção.
-- `versao_base` por execução (reprodutibilidade ponta a ponta).
-- Proteção de injeção de fórmula também na prévia do front (o `.xlsx`/`.csv`
-  baixado já é protegido no `MontadorSaida`).
