@@ -165,9 +165,28 @@ export const DEMO_LOTES: Lote[] = [
     criado_em: '2026-07-02T14:38:00', concluido_em: '2026-07-02T14:52:00', resumo: RESUMO_CONCLUIDO,
   },
   {
+    // No modo demo, este lote serve para demonstrar o progresso/polling (A4). O
+    // resumo já vem preenchido para que a tela conclua a simulação e mostre os
+    // agregados. No backend real, um lote 'processando' teria resumo=null.
     id: 2, nome_arquivo: 'Notas_junho.csv', status: 'processando',
     total_linhas: 10000, linhas_processadas: 4200, criado_por: 'Ana L.',
-    criado_em: '2026-07-03T09:10:00', concluido_em: null, resumo: null,
+    criado_em: '2026-07-03T09:10:00', concluido_em: null,
+    resumo: {
+      linhas: 10000, ok: 7100, invalidas: 300, verde: 7100, amarelo: 2100, vermelho: 800,
+      motivos: [
+        { motivo: 'Alíquota geral pode não refletir produto específico', linhas: 980 },
+        { motivo: 'Descrição diverge da oficial (conferir similaridade)', linhas: 720 },
+        { motivo: 'Estado pendente de validação', linhas: 400 },
+        { motivo: 'Linhas não lidas (entrada inválida)', linhas: 300 },
+      ],
+      categorias: [
+        { categoria: 'TI / Equipamentos', linhas: 3100 },
+        { categoria: 'Materiais de construção', linhas: 2000 },
+        { categoria: 'EPI', linhas: 1400 },
+        { categoria: 'Materiais elétricos', linhas: 1200 },
+        { categoria: 'Outros', linhas: 2300 },
+      ],
+    },
   },
   {
     id: 3, nome_arquivo: 'Materiais_obra_maio.xlsx', status: 'concluido',

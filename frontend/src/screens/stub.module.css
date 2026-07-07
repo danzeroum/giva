@@ -1,0 +1,81 @@
+/* Estilo compartilhado das telas-stub do Bloco B (Operação). */
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--pad-page);
+  animation: fadeup 0.25s ease;
+}
+
+.h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+  color: var(--text);
+}
+
+.nota {
+  font-size: 12.5px;
+  color: var(--demo-tx);
+  background: var(--demo-bg);
+  border: 1px solid var(--demo-line);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+  overflow: hidden;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela thead th {
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.tabela tbody td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.vazio {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.placeholder {
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 13.5px;
+}

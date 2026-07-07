@@ -8,7 +8,7 @@ import styles from './A2.module.css'
 
 const STATUS_LOTE: Record<Lote['status'], { label: string; cor: string; bg: string }> = {
   recebido: { label: 'recebido', cor: 'var(--text-soft)', bg: 'var(--surface-2)' },
-  processando: { label: 'processando', cor: 'var(--accent-ink)', bg: 'var(--accent-soft)' },
+  processando: { label: 'processando', cor: FAROL.amarelo.tx, bg: FAROL.amarelo.bg },
   concluido: { label: 'concluído', cor: FAROL.verde.tx, bg: FAROL.verde.bg },
   erro: { label: 'erro', cor: FAROL.vermelho.tx, bg: FAROL.vermelho.bg },
 }
