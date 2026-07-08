@@ -105,4 +105,7 @@ def preparar_consulta(sql: str, *, limite: int = LIMITE_PADRAO) -> str:
             )
 
     # LIMIT imposto por fora — vale mesmo se o usuário escreveu outro LIMIT.
-    return f"SELECT * FROM ({texto}) AS giva_consulta LIMIT {int(limite)}"
+    # Bandit (B608): `texto` já passou por toda a validação acima (SELECT único,
+    # sem comentários/DML/CTE, só tabelas da whitelist) e `limite` é coagido a int
+    # — a construção da string é intencional e é o próprio ponto deste módulo.
+    return f"SELECT * FROM ({texto}) AS giva_consulta LIMIT {int(limite)}"  # nosec B608
