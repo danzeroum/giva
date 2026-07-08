@@ -14,6 +14,7 @@ export function Login() {
   const authLoading = useApp((s) => s.authLoading)
   const authError = useApp((s) => s.authError)
   const demo = useApp((s) => s.demo)
+  const toggleDemo = useApp((s) => s.toggleDemo)
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
 
@@ -76,9 +77,25 @@ export function Login() {
               {authLoading ? 'Entrando…' : 'Entrar'}
             </button>
           </form>
+          <div className={styles.demoRow}>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={demo}
+              className={`${styles.demoToggle} ${demo ? styles.demoOn : ''}`}
+              onClick={toggleDemo}
+              title="Alternar modo de demonstração"
+            >
+              <span className={styles.demoKnob} />
+            </button>
+            <span className={styles.demoText}>
+              Modo de demonstração <strong>{demo ? 'ligado' : 'desligado'}</strong>
+            </span>
+          </div>
           {demo && (
             <p className={styles.notaDemo}>
-              Modo de demonstração: qualquer email e senha entram como analista fiscal.
+              Dados fictícios — qualquer email e senha entram como analista fiscal.
+              Desligue para entrar com a API real.
             </p>
           )}
           <p className={styles.nota}>Sem autocadastro nesta versão.</p>

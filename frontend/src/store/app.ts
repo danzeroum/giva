@@ -18,6 +18,12 @@ export type Theme = 'system' | 'light' | 'dark'
 
 const THEME_KEY = 'giva-theme'
 
+// Modo demo (dados fictícios, sem backend) — opt-in por build. Com a API real
+// conectada (produção), fica desligado; ligue com VITE_DEMO_MODE=true no build
+// do frontend para telas de demonstração. Só 'true' liga — qualquer outra
+// coisa (ausente, vazio) = desligado.
+const DEMO_INICIAL = import.meta.env.VITE_DEMO_MODE === 'true'
+
 /** Aplica o tema no <html> e persiste. 'system' remove o override e deixa o
  * @media (prefers-color-scheme) decidir. Espelha o script inline do index.html. */
 export function applyTheme(theme: Theme): void {
@@ -84,7 +90,7 @@ export const useApp = create<AppState>((set, get) => ({
   token: null,
   authLoading: false,
   authError: null,
-  demo: true,
+  demo: DEMO_INICIAL,
   theme: temaInicial(),
   loteId: null,
   uploadStep: 'select',
@@ -119,7 +125,15 @@ export const useApp = create<AppState>((set, get) => ({
     set({ token: null, screen: 'login', authError: null })
   },
 
-  toggleDemo: () => set((s) => ({ demo: !s.demo })),
+  // Trocar de modo troca o significado do token (JWT real ↔ a string 'demo'):
+  // zera a sessão e volta ao login, para nunca vazar o token de um modo no
+  // outro — era o que fazia `Bearer demo` chegar na API real e voltar 401
+  // "Not enough segments".
+  toggleDemo: () => {
+    const demo = !get().demo
+    setToken(null)
+    set({ demo, token: null, screen: 'login', authError: null })
+  },
 
   cycleTheme: () => {
     const proximo = PROXIMO_TEMA[get().theme]

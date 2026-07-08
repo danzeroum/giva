@@ -64,6 +64,9 @@ services:
       context: ./frontend
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+        # Demo desligado por padrão — produção usa a API real. Ligue com
+        # VITE_DEMO_MODE=true no .env só para telas de demonstração.
+        VITE_DEMO_MODE: ${VITE_DEMO_MODE:-false}
     ports: ["${FRONTEND_PORT:-8080}:80"]
     restart: unless-stopped
 

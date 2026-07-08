@@ -5,9 +5,12 @@ COPY package.json package-lock.json* ./
 RUN npm ci || npm install
 COPY . .
 # VITE_API_URL é embutida no bundle em build-time (padrão Vite) — não é segredo,
-# é só o endereço público da API.
+# é só o endereço público da API. VITE_DEMO_MODE liga a UI de demonstração
+# (dados fictícios); default 'false' — produção usa a API real.
 ARG VITE_API_URL=http://localhost:8000
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_DEMO_MODE=false
+ENV VITE_DEMO_MODE=$VITE_DEMO_MODE
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runtime
