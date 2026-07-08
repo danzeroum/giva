@@ -1,0 +1,86 @@
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--pad-page);
+  animation: fadeup 0.25s ease;
+}
+
+.h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 24px;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.intro {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.introLink {
+  margin: 0 0 20px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.introLink a {
+  color: var(--accent-strong);
+  cursor: pointer;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  border-radius: 14px;
+}
+
+.header:hover {
+  background: var(--surface-2);
+}
+
+.titulo {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.seta {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.passos {
+  margin: 0;
+  padding: 0 16px 14px 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.passos li {
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.5;
+}

@@ -52,6 +52,25 @@ def dsn_psycopg() -> str:
     return resolver_url_banco().replace("+psycopg", "")
 
 
+def dsn_readonly() -> str:
+    """DSN do usuário Postgres **read-only** dedicado ao SQL livre de
+    "Consultas prontas" (defesa em profundidade, camada 1 — ver
+    `giva.api.consultas_sql`).
+
+    - `READONLY_DATABASE_URL` definida → usa-a (produção aponta para o papel
+      `giva_readonly`, criado na migration 0007, que só tem SELECT nas tabelas
+      da whitelist).
+    - ausente → cai no DSN principal (`dsn_psycopg`). As demais camadas de
+      defesa (transação read-only, `statement_timeout`, validação SELECT-only,
+      whitelist, LIMIT forçado, auditoria) continuam valendo — então dev/CI
+      funcionam sem provisionar o papel separado, sem abrir escrita.
+    """
+    url = os.environ.get("READONLY_DATABASE_URL")
+    if url:
+        return url.replace("+psycopg", "")
+    return dsn_psycopg()
+
+
 class JwtSecretAusenteError(RuntimeError):
     """JWT_SECRET ausente. Mensagem acionável — mesma política 12-factor."""
 
