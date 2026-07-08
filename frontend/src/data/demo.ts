@@ -4,7 +4,7 @@
 // dos DTOs da API (ver src/api/lotes.ts e src/api/operacao.ts), para que os
 // screens troquem `demo ? mock : apiCall()` sem remodelar nada.
 import type { Lote, LinhaLote, Resumo } from '../api/lotes'
-import type { Carga, ContestacaoOperacao, Uf } from '../api/operacao'
+import type { Carga, ContestacaoOperacao, Excecao, HistoricoParametroItem, Parametro, Uf } from '../api/operacao'
 import { statusInfo, type StatusKey } from './statuses'
 
 // -----------------------------------------------------------------------------
@@ -268,26 +268,106 @@ export const LEGENDA: { farol: string; statuses: string[] }[] = [
 ]
 
 // -----------------------------------------------------------------------------
-// Bloco B (operação) — mock mínimo para badges da sidebar e stubs de tela.
+// Bloco B (operação) — mocks no formato dos DTOs da API, portados do protótipo.
+// Alimentam as telas B1–B5 e as badges da sidebar quando o modo demo está ligado.
 // -----------------------------------------------------------------------------
+
+// B2 — alíquotas por estado (12 UFs, com a variedade de situações do protótipo).
 export const DEMO_UFS: Uf[] = [
-  { uf: 'SP', status_validacao: 'validada', aliquota_modal: '18%', fonte_compilada: 'RICMS/SP' },
-  { uf: 'RJ', status_validacao: 'validada', aliquota_modal: '20%', fonte_compilada: 'RICMS/RJ' },
-  { uf: 'MG', status_validacao: 'validada', aliquota_modal: '18%', fonte_compilada: 'RICMS/MG' },
-  { uf: 'PE', status_validacao: 'divergencia_entre_fontes', aliquota_modal: '18%', fonte_compilada: 'consolidado' },
-  { uf: 'PI', status_validacao: 'divergencia_entre_fontes', aliquota_modal: '21%', fonte_compilada: 'consolidado' },
-  { uf: 'RS', status_validacao: 'validada', aliquota_modal: '17%', fonte_compilada: 'RICMS/RS' },
-  { uf: 'BA', status_validacao: 'confirmada_fonte_secundaria', aliquota_modal: '20,5%', fonte_compilada: 'secundária' },
-  { uf: 'PR', status_validacao: 'pendente_validacao', aliquota_modal: '19,5%', fonte_compilada: 'pendente' },
+  { uf: 'SP', vigencia_inicio: '2024-01-01', vigencia_fim: null, aliquota_modal: 18.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'validada', fonte_legal: 'RICMS/SP, Dec. 45.490/2000', fonte_compilada: 'RICMS/SP, Dec. 45.490/2000' },
+  { uf: 'RJ', vigencia_inicio: '2023-04-01', vigencia_fim: null, aliquota_modal: 20.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'validada', fonte_legal: 'RICMS/RJ, Dec. 27.427/2000', fonte_compilada: 'RICMS/RJ, Dec. 27.427/2000' },
+  { uf: 'MG', vigencia_inicio: '2024-01-01', vigencia_fim: null, aliquota_modal: 18.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'validada', fonte_legal: 'RICMS/MG, Dec. 48.589/2023', fonte_compilada: 'RICMS/MG, Dec. 48.589/2023' },
+  { uf: 'RS', vigencia_inicio: '2024-01-01', vigencia_fim: null, aliquota_modal: 17.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'validada', fonte_legal: 'RICMS/RS, Dec. 37.699/1997', fonte_compilada: 'RICMS/RS, Dec. 37.699/1997' },
+  { uf: 'PR', vigencia_inicio: '2024-03-01', vigencia_fim: null, aliquota_modal: 19.5, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'pendente_validacao', fonte_legal: null, fonte_compilada: 'consolidado (2 fontes)' },
+  { uf: 'GO', vigencia_inicio: '2026-04-01', vigencia_fim: null, aliquota_modal: 19.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'pendente_validacao', fonte_legal: null, fonte_compilada: 'consolidado' },
+  { uf: 'CE', vigencia_inicio: '2026-01-01', vigencia_fim: null, aliquota_modal: 20.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'confirmada_fonte_secundaria', fonte_legal: null, fonte_compilada: 'consolidado' },
+  { uf: 'BA', vigencia_inicio: '2023-02-01', vigencia_fim: null, aliquota_modal: 20.5, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'confirmada_fonte_secundaria', fonte_legal: null, fonte_compilada: 'fonte secundária' },
+  { uf: 'PE', vigencia_inicio: '2023-01-01', vigencia_fim: null, aliquota_modal: 18.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'divergencia_entre_fontes', fonte_legal: null, fonte_compilada: 'consolidado ≠ RICMS/PE' },
+  { uf: 'PI', vigencia_inicio: '2024-01-01', vigencia_fim: null, aliquota_modal: 21.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'divergencia_entre_fontes', fonte_legal: null, fonte_compilada: 'consolidado ≠ portal SEFAZ' },
+  { uf: 'RN', vigencia_inicio: '2026-01-01', vigencia_fim: null, aliquota_modal: 20.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'pendente_validacao', fonte_legal: null, fonte_compilada: 'carga #2 (staging)' },
+  { uf: 'SC', vigencia_inicio: '2024-01-01', vigencia_fim: null, aliquota_modal: 17.0, fecp_percentual: null, fecp_incidencia: 'inexistente', status_validacao: 'validada', fonte_legal: 'RICMS/SC, Dec. 2.870/2001', fonte_compilada: 'RICMS/SC, Dec. 2.870/2001' },
 ]
 
-export const DEMO_CARGAS: Carga[] = [
-  { id: 1, fonte: 'Receita Federal / TIPI', arquivo_bruto: 'tipi_2026s27.csv', data_coleta: '01/07/2026', promovido_em: null, promovido_por: null, status: 'staging' },
-  { id: 2, fonte: 'SEFAZ (consolidado)', arquivo_bruto: 'icms_hist_q2.csv', data_coleta: '30/06/2026', promovido_em: null, promovido_por: null, status: 'staging' },
-  { id: 3, fonte: 'RICMS/SP (atualização)', arquivo_bruto: 'ricms_sp_2026.csv', data_coleta: '28/06/2026', promovido_em: '2026-06-29T09:00:00', promovido_por: 'M. Ferraz', status: 'aprovada' },
+// B1 — atualizações da base. `diffDemo` é o detalhe rico que o protótipo mostra;
+// o endpoint real (/cargas/{id}/diff) devolve só listas de códigos por bucket.
+export interface DiffAmostraItem {
+  codigo: string
+  tipo: 'novo' | 'alterado' | 'removido'
+  detalhe: string
+}
+export interface DiffDemo {
+  novos: number
+  alterados: number
+  removidos: number
+  amostra: DiffAmostraItem[]
+}
+export interface CargaDemo extends Carga {
+  diffDemo?: DiffDemo
+}
+
+export const DEMO_CARGAS: CargaDemo[] = [
+  {
+    id: 4, fonte: 'Classif/Siscomex (snapshot semanal)', arquivo_bruto: 'classif_ncm_2026-07-01.json',
+    hash_arquivo: 'demo', data_coleta: '2026-07-01', status: 'staging', criado_em: '2026-07-01T08:00:00',
+    promovido_em: null, promovido_por: null,
+    diffDemo: { novos: 12, alterados: 37, removidos: 3, amostra: [
+      { codigo: '85287220', tipo: 'alterado', detalhe: '“Aparelhos receptores de TV…” → redação Gecex 415/2026' },
+      { codigo: '38249979', tipo: 'novo', detalhe: 'Novo código — “Misturas contendo grafeno”' },
+      { codigo: '84719012', tipo: 'removido', detalhe: 'Extinto — correlaciona p/ 8471.90.14' },
+    ] },
+  },
+  {
+    id: 2, fonte: 'SEFAZ (consolidado alíquotas)', arquivo_bruto: 'icms_hist_q2_2026.csv',
+    hash_arquivo: 'demo', data_coleta: '2026-06-30', status: 'staging', criado_em: '2026-06-30T08:00:00',
+    promovido_em: null, promovido_por: null,
+    diffDemo: { novos: 5, alterados: 2, removidos: 0, amostra: [
+      { codigo: 'GO', tipo: 'alterado', detalhe: 'modal 17,0% → 19,0% (vig. 2026-04-01)' },
+      { codigo: 'CE', tipo: 'alterado', detalhe: 'modal 18,0% → 20,0% (vig. 2026-01-01)' },
+      { codigo: 'RN', tipo: 'novo', detalhe: 'vigência 2026 incluída (pendente de validação)' },
+    ] },
+  },
+  {
+    id: 3, fonte: 'RICMS/SP (atualização)', arquivo_bruto: 'ricms_sp_2026.csv', hash_arquivo: 'demo',
+    data_coleta: '2026-06-28', status: 'promovida', criado_em: '2026-06-28T08:00:00',
+    promovido_em: '2026-06-29T09:00:00', promovido_por: 'M. Ferraz',
+  },
+  {
+    id: 1, fonte: 'Seed de referência (demonstração)', arquivo_bruto: 'seed_2026_demo.sql', hash_arquivo: 'demo',
+    data_coleta: '2026-06-15', status: 'promovida', criado_em: '2026-06-15T08:00:00',
+    promovido_em: '2026-06-15T10:00:00', promovido_por: 'sistema',
+  },
 ]
 
+// B3 — ajustes do sistema. Só {nome, valor, atualizado_em}; a copy (rótulo,
+// descrição, efeito) vem de data/parametros.ts.
+export const DEMO_PARAMETROS: Parametro[] = [
+  { nome: 't_ok', valor: '0.85', atualizado_em: '2026-06-11T15:04:00' },
+  { nome: 't_rev', valor: '0.55', atualizado_em: '2026-05-02T11:40:00' },
+  { nome: 'categoria_versao_vigente', valor: 'v4', atualizado_em: '2026-05-01T09:00:00' },
+  { nome: 'expurgo_lotes_meses', valor: '36', atualizado_em: '2026-04-10T09:00:00' },
+]
+
+// Histórico por parâmetro (demo de "Histórico" em B3).
+export const DEMO_HISTORICO_PARAMETRO: Record<string, HistoricoParametroItem[]> = {
+  t_ok: [
+    { quando: '2026-06-11T15:04:00', quem: 'a.lima', antes: { valor: '0.80' }, depois: { valor: '0.85' } },
+  ],
+  t_rev: [],
+  categoria_versao_vigente: [],
+  expurgo_lotes_meses: [],
+}
+
+// B4 — correções de categoria (exceções).
+export const DEMO_EXCECOES: Excecao[] = [
+  { ncm: '39262000', categoria: 'EPI', justificativa: 'Avental plástico usado como EPI na operação', versao: 'v4', origem_tipo: 'contestacao', origem_contestacao_id: 155, autor_id: 3, criado_em: '2026-06-19T10:31:00' },
+  { ncm: '40151900', categoria: 'EPI', justificativa: 'Luva nitrílica é EPI, não limpeza', versao: 'v4', origem_tipo: 'contestacao', origem_contestacao_id: 150, autor_id: 3, criado_em: '2026-06-19T10:31:00' },
+  { ncm: '22071090', categoria: 'Produto químico', justificativa: 'Álcool como insumo industrial, não bebida', versao: 'v4', origem_tipo: 'curadoria', origem_contestacao_id: null, autor_id: 3, criado_em: '2026-05-02T11:40:00' },
+]
+
+// B5 — contestações.
 export const DEMO_CONTESTACOES: ContestacaoOperacao[] = [
-  { id: 158, lote_id: 1, numero_linha: 4, autor_id: 2, tipo: 'validação de alíquota', texto: 'Dipirona em RJ tem tratamento específico; a alíquota geral de 20% pode não se aplicar.', status: 'aberta', resolucao: null, criado_em: '2026-07-02T15:00:00' },
-  { id: 150, lote_id: 3, numero_linha: 88, autor_id: 2, tipo: 'exceção de categoria', texto: 'Luva nitrílica deveria ser EPI, não “Outros”.', status: 'resolvida', resolucao: 'Exceção criada — luva nitrílica → EPI.', criado_em: '2026-06-19T10:00:00' },
+  { id: 162, lote_id: 1, numero_linha: 5, autor_id: 2, tipo: 'validação de alíquota', texto: 'PE consta pendente, mas o RICMS/PE já publicou a alíquota de 2026 — dá para validar.', status: 'aberta', resolucao: null, criado_em: '2026-07-05T09:00:00', resolvido_em: null },
+  { id: 158, lote_id: 1, numero_linha: 4, autor_id: 2, tipo: 'validação de alíquota', texto: 'Dipirona em RJ tem tratamento específico; a alíquota geral de 20% pode não se aplicar.', status: 'aberta', resolucao: null, criado_em: '2026-07-02T15:00:00', resolvido_em: null },
+  { id: 155, lote_id: 3, numero_linha: 12, autor_id: 2, tipo: 'exceção de categoria', texto: 'Avental de plástico deveria ser EPI, não embalagem.', status: 'aberta', resolucao: null, criado_em: '2026-06-28T10:00:00', resolvido_em: null },
+  { id: 150, lote_id: 3, numero_linha: 88, autor_id: 2, tipo: 'exceção de categoria', texto: 'Luva nitrílica deveria ser EPI, não "Indefinido".', status: 'resolvida', resolucao: 'Exceção criada — 4015.19.00 → EPI.', criado_em: '2026-06-19T10:00:00', resolvido_em: '2026-06-19T10:31:00' },
 ]

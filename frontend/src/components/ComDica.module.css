@@ -1,0 +1,14 @@
+/* Tooltip global de ajuda ("dica"). Fixo na viewport, não intercepta o mouse. */
+.tip {
+  position: fixed;
+  z-index: 200;
+  max-width: 260px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 9px;
+  padding: 8px 11px;
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: var(--sh-pop);
+  pointer-events: none;
+}

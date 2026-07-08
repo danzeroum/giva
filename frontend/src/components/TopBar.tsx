@@ -1,5 +1,7 @@
-import { LogOut, Monitor, Moon, Search, Sun } from 'lucide-react'
+import { HelpCircle, LogOut, Monitor, Moon, Search, Sun } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { type Role, type Theme, useApp } from '../store/app'
+import { useDica } from './ComDica'
 import styles from './TopBar.module.css'
 
 const PAPEL_LABEL: Record<Role, string> = {
@@ -15,10 +17,24 @@ const TEMA_META: Record<Theme, { icon: typeof Sun; label: string; proximo: strin
 }
 
 export function TopBar() {
-  const { role, demo, theme, toggleDemo, cycleTheme, logout } = useApp()
+  const { role, demo, theme, toggleDemo, cycleTheme, logout, go, startTour } = useApp()
+  const { dicaHandlers, tooltip } = useDica()
+  const [ajudaAberto, setAjudaAberto] = useState(false)
+  const ajudaRef = useRef<HTMLDivElement>(null)
   const iniciais = role === 'operador' ? 'OP' : role === 'admin' ? 'AD' : 'AF'
   const tema = TEMA_META[theme]
   const TemaIcon = tema.icon
+  const mostraAjuda = role === 'operador' || role === 'admin'
+
+  // Um menu aberto por vez; clique fora fecha.
+  useEffect(() => {
+    if (!ajudaAberto) return
+    const fechar = (e: MouseEvent) => {
+      if (ajudaRef.current && !ajudaRef.current.contains(e.target as Node)) setAjudaAberto(false)
+    }
+    document.addEventListener('click', fechar)
+    return () => document.removeEventListener('click', fechar)
+  }, [ajudaAberto])
 
   return (
     <header className={styles.bar}>
@@ -35,6 +51,51 @@ export function TopBar() {
       </label>
 
       <div className={styles.right}>
+        {mostraAjuda && (
+          <div className={styles.ajudaWrap} ref={ajudaRef}>
+            <button
+              type="button"
+              className={styles.ajuda}
+              aria-haspopup="menu"
+              aria-expanded={ajudaAberto}
+              data-dica="Tour guiado pelas telas ou manual passo a passo."
+              {...dicaHandlers}
+              onClick={(e) => {
+                e.stopPropagation()
+                setAjudaAberto((v) => !v)
+              }}
+            >
+              <HelpCircle size={15} strokeWidth={2} aria-hidden="true" /> Ajuda
+            </button>
+            {ajudaAberto && (
+              <div className={styles.ajudaMenu} role="menu">
+                <button
+                  type="button"
+                  className={styles.ajudaItem}
+                  role="menuitem"
+                  onClick={() => {
+                    setAjudaAberto(false)
+                    startTour()
+                  }}
+                >
+                  Tour guiado (2 min)
+                </button>
+                <button
+                  type="button"
+                  className={styles.ajudaItem}
+                  role="menuitem"
+                  onClick={() => {
+                    setAjudaAberto(false)
+                    go('manual')
+                  }}
+                >
+                  Manual prático
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         <button
           type="button"
           className={styles.tema}
@@ -69,6 +130,7 @@ export function TopBar() {
           Sair
         </button>
       </div>
+      {tooltip}
     </header>
   )
 }

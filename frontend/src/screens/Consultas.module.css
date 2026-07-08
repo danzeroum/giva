@@ -1,0 +1,149 @@
+.wrap {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: var(--pad-page);
+  animation: fadeup 0.25s ease;
+}
+
+.layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.rail {
+  width: 210px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.railItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 9px 11px;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.railItem:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.railItemAtivo {
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.railSub {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.direita {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.paramCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+  padding: 14px 16px;
+}
+
+.sqlHint {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: 8px;
+}
+
+.textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.resultCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+  overflow-x: auto;
+}
+
+.erro {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--farol-vermelho-tx);
+}
+
+.resultTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.resultTable thead tr {
+  background: var(--surface-2);
+}
+
+.resultTable th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.resultTable td {
+  padding: 7px 12px;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-2);
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footer {
+  padding: 9px 14px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  color: var(--text-faint);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.contagem {
+  margin-left: auto;
+  font-family: var(--font-mono);
+}

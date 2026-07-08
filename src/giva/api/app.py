@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from giva.api.erros import registrar_handlers
-from giva.api.routers import auth, lotes, operacao, saude
+from giva.api.routers import auth, consultas, lotes, operacao, saude
 
 # CORS_ORIGINS: lista separada por vírgula. Default cobre o Vite dev server;
 # em produção, configure via env (nunca "*" com credentials).
@@ -35,6 +35,7 @@ def criar_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(lotes.router)
     app.include_router(operacao.router)
+    app.include_router(consultas.router)
 
     return app
 

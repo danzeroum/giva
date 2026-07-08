@@ -5,18 +5,40 @@
 // nos próprios screens. Enquanto a API não existe, os screens usam os mocks de
 // data/demo.ts quando `demo` está ligado (padrão). A faixa <DemoBanner> avisa.
 import { create } from 'zustand'
+import { TOUR } from '../data/ajuda'
 import { login as apiLogin } from '../api/auth'
 import { ApiError, setToken } from '../api/client'
 
 export type Screen =
   | 'login' | 'a2' | 'a3' | 'a4' | 'a5' | 'a6'
   | 'b1' | 'b2' | 'b3' | 'b4' | 'b5'
+  | 'consultas' | 'manual'
 export type Role = 'analista' | 'operador' | 'admin'
 export type UploadStep = 'select' | 'mapping' | 'preview'
 export type PlanilhaTab = 'dados' | 'leiame' | 'resumo'
 export type Theme = 'system' | 'light' | 'dark'
 
 const THEME_KEY = 'giva-theme'
+// Flag de "tour já visto" — auto-abertura do tour guiado só na primeira visita.
+// Sugestão do handoff: por usuário logado; na V1 o token não traz id estável no
+// front, então mantemos por navegador (localStorage), como no protótipo.
+const TOUR_KEY = 'giva-op-tour-visto'
+
+function tourVisto(): boolean {
+  try {
+    return localStorage.getItem(TOUR_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function marcarTourVisto(): void {
+  try {
+    localStorage.setItem(TOUR_KEY, '1')
+  } catch {
+    /* localStorage indisponível — o tour só não será silenciado nesta sessão */
+  }
+}
 
 // Modo demo (dados fictícios, sem backend) — opt-in por build. Com a API real
 // conectada (produção), fica desligado; ligue com VITE_DEMO_MODE=true no build
@@ -63,8 +85,14 @@ interface AppState {
   pendFilter: string
   pendUf: string
   expanded: Record<number, boolean>
+  tourStep: number | null
 
   go: (screen: Screen) => void
+  autoTour: () => void
+  startTour: () => void
+  tourNext: () => void
+  tourPrev: () => void
+  tourClose: () => void
   login: (email: string, senha: string) => Promise<void>
   logout: () => void
   toggleDemo: () => void
@@ -100,15 +128,48 @@ export const useApp = create<AppState>((set, get) => ({
   pendFilter: 'todos',
   pendUf: 'todos',
   expanded: {},
+  tourStep: null,
 
   go: (screen) => set({ screen }),
 
+  // Auto-abertura na primeira visita do operador (chamado uma vez no App).
+  autoTour: () => {
+    if (!tourVisto() && get().tourStep === null) {
+      set({ tourStep: 0, screen: TOUR[0].screen })
+    }
+  },
+  startTour: () => set({ tourStep: 0, screen: TOUR[0].screen }),
+  tourNext: () => {
+    const passo = get().tourStep
+    if (passo === null) return
+    if (passo >= TOUR.length - 1) {
+      marcarTourVisto()
+      set({ tourStep: null })
+      return
+    }
+    const proximo = passo + 1
+    set({ tourStep: proximo, screen: TOUR[proximo].screen })
+  },
+  tourPrev: () => {
+    const passo = get().tourStep
+    if (passo === null || passo === 0) return
+    const anterior = passo - 1
+    set({ tourStep: anterior, screen: TOUR[anterior].screen })
+  },
+  tourClose: () => {
+    marcarTourVisto()
+    set({ tourStep: null })
+  },
+
   login: async (email, senha) => {
     set({ authLoading: true, authError: null })
-    // Modo demo: sem backend, qualquer credencial válida entra como analista.
+    // Modo demo: sem backend, qualquer credencial válida entra como admin — assim
+    // a demonstração alcança TODAS as áreas (analista + operação: B1–B5, Consultas
+    // prontas, ajuda), que é o que os mocks de data/demo.ts cobrem. O tour guiado
+    // auto-abre na primeira visita e leva pelas telas de operação.
     if (get().demo) {
       setToken('demo')
-      set({ token: 'demo', role: 'analista', screen: 'a2', authLoading: false })
+      set({ token: 'demo', role: 'admin', screen: 'a2', authLoading: false })
       return
     }
     try {

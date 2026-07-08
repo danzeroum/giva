@@ -1,0 +1,359 @@
+/* Estilos compartilhados das telas do Bloco B (Operação) — B1..B5.
+   Nenhum hex de marca aqui: só var(--token) do Design System. */
+
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--pad-page);
+  animation: fadeup 0.25s ease;
+}
+
+.wrapEstreito {
+  max-width: 760px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.h1 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+.sub {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.head .sub {
+  margin: 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+}
+
+.cardVisivel {
+  overflow: visible;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela thead tr {
+  background: var(--surface-2);
+}
+
+.tabela th {
+  text-align: left;
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tabela tbody td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line-soft);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+}
+
+.faint {
+  color: var(--text-soft);
+  font-size: 12.5px;
+}
+
+.acaoCol {
+  width: 44px;
+  text-align: right;
+  position: relative;
+}
+
+/* Botão ⋯ (28×28) */
+.mais {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 8px;
+  color: var(--text-soft);
+  display: inline-grid;
+  place-items: center;
+}
+
+.mais:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Menu suspenso */
+.menu {
+  position: absolute;
+  z-index: 30;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--sh-pop);
+  min-width: 180px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menuDireita {
+  right: 10px;
+  top: 36px;
+}
+
+.menuEsquerda {
+  left: 14px;
+  top: 36px;
+  min-width: 230px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.menuItem:hover {
+  background: var(--surface-2);
+}
+
+.menuItemVerde {
+  color: var(--farol-verde-tx);
+}
+
+.menuItemVerde:hover {
+  background: var(--farol-verde-bg);
+}
+
+.menuItemVermelho {
+  color: var(--farol-vermelho-tx);
+}
+
+.menuItemVermelho:hover {
+  background: var(--farol-vermelho-bg);
+}
+
+.dotMenu {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex: none;
+}
+
+/* Botões primário / secundário */
+.btnPrim {
+  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: var(--r-btn);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.btnPrim:hover {
+  background: var(--accent-strong);
+}
+
+.btnSec {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: var(--r-btn);
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.btnSec:hover {
+  background: var(--surface-2);
+}
+
+.btnSmall {
+  padding: 7px 12px;
+  font-size: 12.5px;
+}
+
+/* Painel de diff (B1) */
+.diffPainel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 2px;
+}
+
+.diffCabeca {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.diffTitulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pill {
+  border-radius: var(--r-pill);
+  padding: 2px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.pillVerde { background: var(--farol-verde-bg); color: var(--farol-verde-tx); }
+.pillAmarelo { background: var(--farol-amarelo-bg); color: var(--farol-amarelo-tx); }
+.pillVermelho { background: var(--farol-vermelho-bg); color: var(--farol-vermelho-tx); }
+
+.diffTabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.diffTabela th {
+  text-align: left;
+  padding: 5px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.diffTabela td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--text-soft);
+}
+
+.diffAcoes {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.diffNota {
+  font-size: 11.5px;
+  color: var(--text-faint);
+}
+
+.mudNovo { color: var(--farol-verde-tx); font-weight: 600; }
+.mudAlterado { color: var(--farol-amarelo-tx); font-weight: 600; }
+.mudRemovido { color: var(--farol-vermelho-tx); font-weight: 600; }
+
+/* Formulário inline (B4/B5) */
+.form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.formDestaque {
+  background: var(--card);
+  border: 1px solid var(--accent-line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.campoLargo {
+  flex: 1;
+  min-width: 220px;
+}
+
+.input,
+.select {
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-btn);
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 400;
+}
+
+.inputMono {
+  font-family: var(--font-mono);
+}
+
+.erroPill {
+  font-size: 12px;
+  color: var(--farol-vermelho-tx);
+  background: var(--farol-vermelho-bg);
+  border-radius: var(--r-pill);
+  padding: 4px 11px;
+  align-self: center;
+}
+
+/* Cards de lista (B3/B5) */
+.pilha {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.itemCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--sh-card);
+  padding: 14px 16px;
+}
+
+.vazio {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
