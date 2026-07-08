@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Archivo:wght@400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    --accent:#b98a4b; --accent-strong:#a5763b; --accent-ink:#0a1a2e;
+    --accent-soft:rgba(185,138,75,0.16); --accent-line:rgba(185,138,75,0.45);
+    --success:#3fb68b; --error:#c0563d;
+    --dot-verde:#3fb68b; --dot-amarelo:#b98a4b; --dot-vermelho:#c0563d; --dot-cinza:#8a8f97;
+    --bg:#f4f1ea; --surface:#edeff3; --surface-2:#ded8cc; --surface-3:#e7e1d5; --card:#edeff3;
+    --text:#0a1a2e; --text-2:#16304f; --text-soft:#3a4a5c; --text-muted:#5e6b7a; --text-faint:#8a94a0;
+    --line:#d8d2c4; --line-soft:#e6e1d6; --focus:#1e6fb0;
+    --verde-bg:#e3f3ec; --verde-tx:#1b6b4e; --amarelo-bg:#f5ead6; --amarelo-tx:#7a5a20;
+    --vermelho-bg:#f7e4de; --vermelho-tx:#8a3826; --cinza-bg:#e6e1d6; --cinza-tx:#55524b;
+    --demo-bg:#f3e7d1; --demo-line:#e0c896; --demo-tx:#6e5220;
+    --sh-card:0 1px 2px rgba(10,26,46,0.07);
+    --sh-pop:0 24px 60px -28px rgba(10,26,46,0.45);
+  }
+  :root[data-theme='dark'] {
+    --bg:#0a1a2e; --surface:#142a44; --surface-2:#1e3a56; --surface-3:#10233a; --card:#142a44;
+    --text:#f4f1ea; --text-2:#edeff3; --text-soft:#c6d0dc; --text-muted:#9daab8; --text-faint:#6e7e8f;
+    --line:#24405c; --line-soft:#1b3450; --focus:#6fb0e6;
+    --verde-bg:#163a2e; --verde-tx:#6fd5ae; --amarelo-bg:#3a2e17; --amarelo-tx:#e0b979;
+    --vermelho-bg:#3a1e16; --vermelho-tx:#e8917b; --cinza-bg:#253547; --cinza-tx:#b8c2ce;
+    --demo-bg:#33280f; --demo-line:#5a4620; --demo-tx:#e0b979;
+    --sh-card:0 1px 2px rgba(0,0,0,0.35);
+    --sh-pop:0 24px 60px -28px rgba(0,0,0,0.6);
+  }
+  html, body, #root { height:100%; }
+  body { margin:0; font-family:'Archivo',system-ui,sans-serif; font-size:14px; line-height:1.45;
+         color:var(--text); background:var(--bg); -webkit-font-smoothing:antialiased; }
+  a { color:var(--accent-strong); text-decoration:none; }
+  a:hover { color:var(--accent); text-decoration:underline; }
+  button { font-family:inherit; cursor:pointer; color:inherit; }
+  input, select, textarea { font-family:inherit; }
+  :focus-visible { outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
+  @keyframes fadeup { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+</style>
+</helmet>
+
+<div style="height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--text);overflow:hidden" onClick="{{ fecharMenus }}">
+
+  <!-- ===== TopBar ===== -->
+  <header style="height:52px;flex:none;display:flex;align-items:center;background:var(--surface);border-bottom:1px solid var(--line);padding:0 18px;gap:10px">
+    <span style="width:24px;height:24px;border-radius:7px;background:var(--accent);display:grid;place-items:center">
+      <span style="width:7px;height:7px;border-radius:2px;background:var(--accent-ink)"></span>
+    </span>
+    <span style="font-family:'Newsreader',serif;font-weight:600;font-size:18px;letter-spacing:0.02em">GIVA</span>
+    <span style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-left:4px;padding:3px 8px;border:1px solid var(--line);border-radius:20px">Operação</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+      <sc-if value="{{ mostraFaixaDemo }}" hint-placeholder-val="{{ true }}">
+        <span style="font-size:11.5px;color:var(--demo-tx);background:var(--demo-bg);border:1px solid var(--demo-line);border-radius:20px;padding:3px 10px">Dados de demonstração — sem valor fiscal</span>
+      </sc-if>
+      <div style="position:relative">
+        <button type="button" onClick="{{ abrirMenuAjuda }}" data-dica="Tour guiado pelas telas ou manual passo a passo."
+          onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+          style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:9px;color:var(--text);font-size:12px;font-weight:600">? Ajuda</button>
+        <sc-if value="{{ menuAjudaAberto }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;top:36px;z-index:60;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh-pop);min-width:210px;padding:5px;display:flex;flex-direction:column">
+            <button type="button" onClick="{{ iniciarTour }}" style="text-align:left;border:none;background:transparent;padding:9px 10px;border-radius:7px;font-size:13px" style-hover="background:var(--surface-2)">Tour guiado (2 min)</button>
+            <button type="button" onClick="{{ abrirManual }}" style="text-align:left;border:none;background:transparent;padding:9px 10px;border-radius:7px;font-size:13px" style-hover="background:var(--surface-2)">Manual prático</button>
+          </div>
+        </sc-if>
+      </div>
+      <button type="button" onClick="{{ cycleTheme }}" data-dica="Muda as cores da tela: claro, escuro ou seguir o computador."
+        onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+        style="display:flex;align-items:center;gap:6px;width:auto;height:30px;padding:0 10px;border:1px solid var(--line);background:var(--card);border-radius:9px;color:var(--text-soft);font-size:12px">{{ temaLabel }}</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12.5px;color:var(--text-2);font-weight:600">M. Ferraz</span>
+        <span style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:10.5px;font-weight:700">OP</span>
+      </div>
+    </div>
+  </header>
+
+  <div style="flex:1;display:flex;min-height:0">
+
+    <!-- ===== Sidebar ===== -->
+    <nav style="width:208px;flex:none;background:var(--surface-3);border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:16px;overflow-y:auto" aria-label="Navegação principal">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding:4px 10px 6px">Base &amp; motor</div>
+        <sc-for list="{{ navOperacao }}" as="it" hint-placeholder-count="5">
+          <button type="button" onClick="{{ it.go }}" data-dica="{{ it.dica }}"
+            onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+            style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:none;background:{{ it.bg }};color:{{ it.cor }};border-radius:8px;font-size:13px;text-align:left;font-weight:{{ it.peso }}"
+            style-hover="background:var(--surface-2);color:var(--text)">
+            <span style="flex:1">{{ it.label }}</span>
+            <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:700;display:grid;place-items:center">{{ it.badge }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding:4px 10px 6px">Banco de dados</div>
+        <sc-for list="{{ navBanco }}" as="it" hint-placeholder-count="1">
+          <button type="button" onClick="{{ it.go }}" data-dica="{{ it.dica }}"
+            onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+            style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:none;background:{{ it.bg }};color:{{ it.cor }};border-radius:8px;font-size:13px;text-align:left;font-weight:{{ it.peso }}"
+            style-hover="background:var(--surface-2);color:var(--text)">
+            <span style="flex:1">{{ it.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);padding:4px 10px 6px">Ajuda</div>
+        <sc-for list="{{ navAjuda }}" as="it" hint-placeholder-count="2">
+          <button type="button" onClick="{{ it.go }}" data-dica="{{ it.dica }}"
+            onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+            style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border:none;background:{{ it.bg }};color:{{ it.cor }};border-radius:8px;font-size:13px;text-align:left;font-weight:{{ it.peso }}"
+            style-hover="background:var(--surface-2);color:var(--text)">
+            <span style="flex:1">{{ it.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="margin-top:auto;padding:10px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--line)">A superfície nº 1 é a planilha de saída.</div>
+    </nav>
+
+    <!-- ===== Main ===== -->
+    <main style="flex:1;overflow-y:auto;padding:26px 32px 48px;min-width:0">
+
+      <!-- ============ B1 — Cargas e aprovações ============ -->
+      <sc-if value="{{ isB1 }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="B1 Cargas e aprovações" style="max-width:960px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Atualizações da base</h1>
+          <p style="margin:0 0 20px;font-size:13px;color:var(--text-muted)">Quando chega uma tabela nova (códigos NCM ou alíquotas), ela espera aqui. Nada muda no sistema até você aprovar.</p>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);overflow:visible">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--surface-2)">
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Fonte</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Arquivo</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Coleta</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Status</th>
+                  <th style="width:44px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ cargasView }}" as="c" hint-placeholder-count="4">
+                  <tr style="border-top:1px solid var(--line-soft)">
+                    <td style="padding:10px 14px;color:var(--text-2)">{{ c.fonte }}</td>
+                    <td style="padding:10px 14px;font-family:'Fragment Mono',monospace;font-size:12px;color:var(--text-soft)">{{ c.arquivo }}</td>
+                    <td style="padding:10px 14px;color:var(--text-soft)">{{ c.coleta }}</td>
+                    <td style="padding:10px 14px">
+                      <span style="display:inline-flex;align-items:center;gap:6px;background:{{ c.badgeBg }};color:{{ c.badgeTx }};border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:600">
+                        <span style="width:7px;height:7px;border-radius:2px;background:{{ c.badgeDot }}"></span>{{ c.badgeLabel }}
+                      </span>
+                    </td>
+                    <td style="padding:6px 10px;position:relative;text-align:right">
+                      <sc-if value="{{ c.staging }}" hint-placeholder-val="{{ false }}">
+                        <button type="button" onClick="{{ c.abrirMenu }}" aria-label="Ações da carga"
+                          data-dica="Ações desta atualização: ver o que muda, aprovar ou descartar." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+                          style="width:28px;height:28px;border:1px solid var(--line);background:var(--card);border-radius:8px;color:var(--text-soft);font-size:15px;line-height:1">⋯</button>
+                        <sc-if value="{{ c.menuAberto }}" hint-placeholder-val="{{ false }}">
+                          <div style="position:absolute;right:10px;top:36px;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh-pop);min-width:180px;padding:5px;display:flex;flex-direction:column">
+                            <button type="button" onClick="{{ c.verDiff }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:13px" style-hover="background:var(--surface-2)">{{ c.diffLabel }}</button>
+                            <button type="button" onClick="{{ c.promover }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:13px;color:var(--verde-tx)" style-hover="background:var(--verde-bg)">Aprovar e aplicar</button>
+                            <button type="button" onClick="{{ c.rejeitar }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:13px;color:var(--vermelho-tx)" style-hover="background:var(--vermelho-bg)">Descartar</button>
+                          </div>
+                        </sc-if>
+                      </sc-if>
+                    </td>
+                  </tr>
+                  <sc-if value="{{ c.diffAberto }}" hint-placeholder-val="{{ false }}">
+                    <tr>
+                      <td colSpan="5" style="padding:0 14px 16px;border-top:none">
+                        <div style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:2px">
+                          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+                            <span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">O que muda se você aprovar</span>
+                            <span style="background:var(--verde-bg);color:var(--verde-tx);border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:600">+{{ c.diffNovos }} novos</span>
+                            <span style="background:var(--amarelo-bg);color:var(--amarelo-tx);border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:600">{{ c.diffAlterados }} alterados</span>
+                            <span style="background:var(--vermelho-bg);color:var(--vermelho-tx);border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:600">−{{ c.diffRemovidos }} removidos</span>
+                          </div>
+                          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+                            <thead>
+                              <tr>
+                                <th style="text-align:left;padding:5px 8px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">NCM</th>
+                                <th style="text-align:left;padding:5px 8px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Mudança</th>
+                                <th style="text-align:left;padding:5px 8px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted)">Antes → depois</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <sc-for list="{{ c.amostra }}" as="d" hint-placeholder-count="3">
+                                <tr style="border-top:1px solid var(--line-soft)">
+                                  <td style="padding:6px 8px;font-family:'Fragment Mono',monospace;font-size:11.5px">{{ d.codigo }}</td>
+                                  <td style="padding:6px 8px;color:{{ d.cor }};font-weight:600">{{ d.tipo }}</td>
+                                  <td style="padding:6px 8px;color:var(--text-soft)">{{ d.detalhe }}</td>
+                                </tr>
+                              </sc-for>
+                            </tbody>
+                          </table>
+                          <div style="display:flex;gap:8px;margin-top:14px">
+                            <button type="button" onClick="{{ c.promover }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:8px 16px;font-size:13px;font-weight:600" style-hover="background:var(--accent-strong)">{{ c.promoverLabel }}</button>
+                            <button type="button" onClick="{{ c.rejeitar }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 16px;font-size:13px;color:var(--text-soft)" style-hover="background:var(--surface-2)">Descartar</button>
+                            <span style="align-self:center;font-size:11.5px;color:var(--text-faint)">Tudo é aplicado de uma vez e fica registrado — dá para saber depois quem aprovou e quando.</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-if>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ B2 — Validação por estado ============ -->
+      <sc-if value="{{ isB2 }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="B2 Validação por estado" style="max-width:960px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Alíquotas por estado</h1>
+          <p style="margin:0 0 20px;font-size:13px;color:var(--text-muted)">A alíquota de ICMS que o GIVA usa para cada estado. Clique no selo para marcar o que você já conferiu na fonte oficial.</p>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card)">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--surface-2)">
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">UF</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Alíquota interna</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Vigência</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Validação</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Fonte</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ ufsView }}" as="u" hint-placeholder-count="8">
+                  <tr style="border-top:1px solid var(--line-soft)">
+                    <td style="padding:9px 14px;font-family:'Fragment Mono',monospace;font-weight:600">{{ u.uf }}</td>
+                    <td style="padding:9px 14px;font-family:'Fragment Mono',monospace">{{ u.aliquota }}</td>
+                    <td style="padding:9px 14px;color:var(--text-soft);font-size:12.5px">{{ u.vigencia }}</td>
+                    <td style="padding:6px 14px;position:relative">
+                      <button type="button" onClick="{{ u.abrirMenu }}"
+                        data-dica="Clique para mudar a situação: já conferi na fonte oficial, fontes não batem etc." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}"
+                        style="display:inline-flex;align-items:center;gap:6px;background:{{ u.badgeBg }};color:{{ u.badgeTx }};border:none;border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600">
+                        <span style="width:7px;height:7px;border-radius:2px;background:{{ u.badgeDot }}"></span>{{ u.badgeLabel }}
+                        <span style="opacity:0.6;font-size:9px">▾</span>
+                      </button>
+                      <sc-if value="{{ u.menuAberto }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;left:14px;top:36px;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh-pop);min-width:230px;padding:5px;display:flex;flex-direction:column">
+                          <sc-for list="{{ u.opcoes }}" as="op" hint-placeholder-count="4">
+                            <button type="button" onClick="{{ op.set }}" style="display:flex;align-items:center;gap:8px;text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:12.5px" style-hover="background:var(--surface-2)">
+                              <span style="width:7px;height:7px;border-radius:2px;background:{{ op.dot }}"></span>{{ op.label }}
+                            </button>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </td>
+                    <td style="padding:9px 14px;color:var(--text-soft);font-size:12.5px">{{ u.fonte }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ B3 — Parâmetros do motor ============ -->
+      <sc-if value="{{ isB3 }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="B3 Parâmetros do motor" style="max-width:760px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Ajustes do sistema</h1>
+          <p style="margin:0 0 20px;font-size:13px;color:var(--text-muted)">Controles de como o GIVA analisa as planilhas. Cada mudança fica registrada com quem alterou e quando.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ paramsView }}" as="p" hint-placeholder-count="4">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+                      <span style="font-size:14px;font-weight:600;color:var(--text)">{{ p.rotulo }}</span>
+                      <span style="font-family:'Fragment Mono',monospace;font-size:10.5px;color:var(--text-faint)">{{ p.nome }}</span>
+                    </div>
+                    <div style="font-size:12.5px;color:var(--text-soft);margin-top:3px">{{ p.descricao }}</div>
+                    <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;padding-left:8px;border-left:2px solid var(--accent-line)">{{ p.efeito }}</div>
+                  </div>
+                  <input name="{{ p.nome }}" value="{{ p.valor }}" onChange="{{ editarParam }}"
+                    style="width:110px;font-family:'Fragment Mono',monospace;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);text-align:right">
+                  <sc-if value="{{ p.alterado }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{ p.salvar }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600" style-hover="background:var(--accent-strong)">Salvar</button>
+                  </sc-if>
+                  <button type="button" onClick="{{ p.toggleHist }}" data-dica="Mostra quem alterou este ajuste, quando, e qual era o valor antes." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 12px;font-size:12.5px;color:var(--text-soft)" style-hover="background:var(--surface-2)">Histórico</button>
+                </div>
+                <sc-if value="{{ p.histAberto }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px;border-top:1px solid var(--line-soft);padding-top:10px;display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ p.historico }}" as="h" hint-placeholder-count="2">
+                      <div style="display:flex;gap:10px;font-size:12px;color:var(--text-soft)">
+                        <span style="font-family:'Fragment Mono',monospace;color:var(--text-faint);flex:none">{{ h.quando }}</span>
+                        <span style="font-weight:600;color:var(--text-2);flex:none">{{ h.quem }}</span>
+                        <span>{{ h.mudanca }}</span>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ p.semHistorico }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:12px;color:var(--text-faint)">Sem alterações registradas.</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ B4 — Exceções de categoria ============ -->
+      <sc-if value="{{ isB4 }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="B4 Exceções de categoria" style="max-width:960px;animation:fadeup 0.25s ease">
+          <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:20px">
+            <div style="flex:1">
+              <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Correções de categoria</h1>
+              <p style="margin:0;font-size:13px;color:var(--text-muted)">Quando um código NCM cai na categoria errada, corrija aqui — a correção vale para todos os próximos processamentos. Versão em uso: <span style="font-family:'Fragment Mono',monospace">{{ versaoMapa }}</span></p>
+            </div>
+            <button type="button" onClick="{{ toggleFormExcecao }}" data-dica="Abre o formulário: informe o código NCM, a categoria certa e o motivo." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600;flex:none" style-hover="background:var(--accent-strong)">{{ formExcecaoLabel }}</button>
+          </div>
+          <sc-if value="{{ formExcecaoAberto }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--card);border:1px solid var(--accent-line);border-radius:14px;padding:16px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+              <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">NCM (8 dígitos)
+                <input name="ncm" value="{{ feNcm }}" onChange="{{ editarExcecao }}" placeholder="3926.20.00"
+                  style="width:130px;font-family:'Fragment Mono',monospace;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Categoria
+                <select name="categoria" value="{{ feCategoria }}" onChange="{{ editarExcecao }}"
+                  style="font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                  <sc-for list="{{ categorias }}" as="cat" hint-placeholder-count="6"><option value="{{ cat }}">{{ cat }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1;min-width:220px">Motivo (obrigatório)
+                <input name="justificativa" value="{{ feJustificativa }}" onChange="{{ editarExcecao }}" placeholder="Por que esta correção existe"
+                  style="font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+              </label>
+              <button type="button" onClick="{{ criarExcecao }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:9px 16px;font-size:13px;font-weight:600" style-hover="background:var(--accent-strong)">Salvar correção</button>
+              <sc-if value="{{ feErro }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:12px;color:var(--vermelho-tx);background:var(--vermelho-bg);border-radius:20px;padding:4px 11px">{{ feErro }}</span>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card)">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr style="background:var(--surface-2)">
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">NCM</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Categoria</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Justificativa</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Origem</th>
+                  <th style="text-align:left;padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Criada em</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ excecoesView }}" as="e" hint-placeholder-count="3">
+                  <tr style="border-top:1px solid var(--line-soft)">
+                    <td style="padding:9px 14px;font-family:'Fragment Mono',monospace;font-size:12px">{{ e.ncm }}</td>
+                    <td style="padding:9px 14px;font-weight:600;color:var(--text-2)">{{ e.categoria }}</td>
+                    <td style="padding:9px 14px;color:var(--text-soft)">{{ e.justificativa }}</td>
+                    <td style="padding:9px 14px;font-size:12px;color:var(--text-muted)">{{ e.origem }}</td>
+                    <td style="padding:9px 14px;font-size:12px;color:var(--text-muted)">{{ e.criadoEm }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ B5 — Contestações ============ -->
+      <sc-if value="{{ isB5 }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="B5 Contestações" style="max-width:860px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Contestações</h1>
+          <p style="margin:0 0 20px;font-size:13px;color:var(--text-muted)">Dúvidas e discordâncias que os analistas apontaram nas planilhas. Responda ou corrija a base direto daqui.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ contestacoesView }}" as="ct" hint-placeholder-count="3">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);padding:14px 16px">
+                <div style="display:flex;align-items:flex-start;gap:12px">
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                      <span style="font-family:'Fragment Mono',monospace;font-size:12px;color:var(--text-faint)">#{{ ct.id }}</span>
+                      <span style="font-size:12px;font-weight:600;color:var(--text-2)">{{ ct.tipo }}</span>
+                      <span style="font-size:11.5px;color:var(--text-muted)">lote {{ ct.lote }} · linha {{ ct.linha }} · {{ ct.criadoEm }}</span>
+                    </div>
+                    <div style="font-size:13.5px;margin-top:6px;color:var(--text)">{{ ct.texto }}</div>
+                    <sc-if value="{{ ct.resolucao }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:12.5px;margin-top:8px;color:var(--verde-tx);background:var(--verde-bg);border-radius:8px;padding:7px 10px">Resolução: {{ ct.resolucao }}</div>
+                    </sc-if>
+                  </div>
+                  <span style="flex:none;display:inline-flex;align-items:center;gap:6px;background:{{ ct.badgeBg }};color:{{ ct.badgeTx }};border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:600">
+                    <span style="width:7px;height:7px;border-radius:2px;background:{{ ct.badgeDot }}"></span>{{ ct.badgeLabel }}
+                  </span>
+                  <sc-if value="{{ ct.aberta }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:relative;flex:none">
+                      <button type="button" onClick="{{ ct.abrirMenu }}" data-dica="Escolha o que fazer: corrigir a categoria, mandar conferir a alíquota ou só responder." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 12px;font-size:12.5px;color:var(--text-soft)" style-hover="background:var(--surface-2)">Encaminhar ▾</button>
+                      <sc-if value="{{ ct.menuAberto }}" hint-placeholder-val="{{ false }}">
+                        <div style="position:absolute;right:0;top:36px;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh-pop);min-width:230px;padding:5px;display:flex;flex-direction:column">
+                          <button type="button" onClick="{{ ct.encExcecao }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:12.5px" style-hover="background:var(--surface-2)">Corrigir a categoria</button>
+                          <button type="button" onClick="{{ ct.encUf }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:12.5px" style-hover="background:var(--surface-2)">Mandar conferir a alíquota do estado</button>
+                          <button type="button" onClick="{{ ct.encResposta }}" style="text-align:left;border:none;background:transparent;padding:8px 10px;border-radius:7px;font-size:12.5px" style-hover="background:var(--surface-2)">Responder e resolver</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ ct.encaminhando }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:12px;border-top:1px solid var(--line-soft);padding-top:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <sc-if value="{{ ct.encEhExcecao }}" hint-placeholder-val="{{ false }}">
+                      <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">NCM
+                        <input name="ncm" value="{{ encNcm }}" onChange="{{ editarEnc }}" style="width:120px;font-family:'Fragment Mono',monospace;font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                      </label>
+                      <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Categoria
+                        <select name="categoria" value="{{ encCategoria }}" onChange="{{ editarEnc }}" style="font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                          <sc-for list="{{ categorias }}" as="cat2" hint-placeholder-count="6"><option value="{{ cat2 }}">{{ cat2 }}</option></sc-for>
+                        </select>
+                      </label>
+                    </sc-if>
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted);flex:1;min-width:220px">Resolução
+                      <input name="resolucao" value="{{ encResolucao }}" onChange="{{ editarEnc }}" placeholder="{{ ct.encPlaceholder }}" style="font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                    </label>
+                    <button type="button" onClick="{{ ct.confirmarEnc }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600" style-hover="background:var(--accent-strong)">Resolver</button>
+                    <button type="button" onClick="{{ cancelarEnc }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 12px;font-size:12.5px;color:var(--text-soft)" style-hover="background:var(--surface-2)">Cancelar</button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ Consulta ao banco ============ -->
+      <sc-if value="{{ isConsulta }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Consulta ao banco" style="max-width:1060px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Consultas prontas</h1>
+          <p style="margin:0 0 20px;font-size:13px;color:var(--text-muted)">Perguntas frequentes à base do GIVA — funciona como um filtro de planilha: escolha a pergunta, preencha e execute. Nada aqui altera dados.</p>
+          <div style="display:flex;gap:16px;align-items:flex-start">
+            <div style="width:210px;flex:none;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ scriptsNav }}" as="s" hint-placeholder-count="7">
+                <button type="button" onClick="{{ s.selecionar }}"
+                  style="display:flex;flex-direction:column;gap:1px;width:100%;padding:9px 11px;border:none;background:{{ s.bg }};color:{{ s.cor }};border-radius:8px;font-size:13px;text-align:left;font-weight:{{ s.peso }}"
+                  style-hover="background:var(--surface-2);color:var(--text)">
+                  <span>{{ s.label }}</span>
+                  <span style="font-size:11px;color:var(--text-faint);font-weight:400">{{ s.sub }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);padding:14px 16px">
+                <sc-if value="{{ mostraParamNcm }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Código NCM ou termo da descrição
+                      <input name="ncm" value="{{ qNcm }}" onChange="{{ editarQ }}" placeholder="8471.30.19 ou “furadeira”"
+                        style="width:260px;font-family:'Fragment Mono',monospace;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                    </label>
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Período (opcional)
+                      <input name="periodo" value="{{ qPeriodo }}" onChange="{{ editarQ }}" placeholder="2026-05"
+                        style="width:110px;font-family:'Fragment Mono',monospace;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                    </label>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ mostraParamAliquota }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">UF
+                      <select name="uf" value="{{ qUf }}" onChange="{{ editarQ }}" style="font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                        <sc-for list="{{ ufsSiglas }}" as="sig" hint-placeholder-count="8"><option value="{{ sig }}">{{ sig }}</option></sc-for>
+                      </select>
+                    </label>
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Período (AAAA-MM)
+                      <input name="periodo" value="{{ qPeriodo }}" onChange="{{ editarQ }}" placeholder="2026-05"
+                        style="width:110px;font-family:'Fragment Mono',monospace;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                    </label>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ mostraParamRegras }}" hint-placeholder-val="{{ false }}">
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">NCM
+                    <input name="ncm" value="{{ qNcm }}" onChange="{{ editarQ }}" placeholder="3926.20.00"
+                      style="width:200px;font-family:'Fragment Mono',monospace;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                  </label>
+                </sc-if>
+                <sc-if value="{{ mostraParamLinhas }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Status
+                      <select name="status" value="{{ qStatus }}" onChange="{{ editarQ }}" style="font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                        <sc-for list="{{ statusOpcoes }}" as="so" hint-placeholder-count="6"><option value="{{ so.valor }}">{{ so.label }}</option></sc-for>
+                      </select>
+                    </label>
+                    <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">UF
+                      <select name="lUf" value="{{ qLUf }}" onChange="{{ editarQ }}" style="font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                        <option value="todos">todas</option>
+                        <sc-for list="{{ ufsSiglas }}" as="sig2" hint-placeholder-count="8"><option value="{{ sig2 }}">{{ sig2 }}</option></sc-for>
+                      </select>
+                    </label>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ mostraParamAuditoria }}" hint-placeholder-val="{{ false }}">
+                  <label style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--text-muted)">Filtro (quem, ação ou alvo — opcional)
+                    <input name="alvo" value="{{ qAlvo }}" onChange="{{ editarQ }}" placeholder="parametro:t_ok ou m.ferraz"
+                      style="width:280px;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text)">
+                  </label>
+                </sc-if>
+                <sc-if value="{{ mostraParamSaude }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px;color:var(--text-muted)">Cobertura e pendências de todas as bases de referência. Sem parâmetros.</div>
+                </sc-if>
+                <sc-if value="{{ mostraParamSql }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <textarea name="sql" value="{{ qSql }}" onChange="{{ editarQ }}" rows="4" spellCheck="{{ false }}"
+                      style="font-family:'Fragment Mono',monospace;font-size:12.5px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);resize:vertical;line-height:1.5"></textarea>
+                    <div style="font-size:11.5px;color:var(--text-faint)">Somente SELECT. Tabelas: ufs · cargas · excecoes · contestacoes · parametros · auditoria · ncm_vigente · lote_linha. Ex.: <span style="font-family:'Fragment Mono',monospace">SELECT * FROM ncm_vigente LIMIT 5</span></div>
+                  </div>
+                </sc-if>
+                <div style="margin-top:12px">
+                  <button type="button" onClick="{{ executarConsulta }}" data-dica="Roda a consulta e mostra o resultado como uma tabela — nada é alterado." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600" style-hover="background:var(--accent-strong)">Executar</button>
+                </div>
+              </div>
+
+              <sc-if value="{{ temResultado }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);overflow-x:auto">
+                  <sc-if value="{{ resultadoErro }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:14px 16px;font-size:13px;color:var(--vermelho-tx)">{{ resultadoErro }}</div>
+                  </sc-if>
+                  <sc-if value="{{ resultadoOk }}" hint-placeholder-val="{{ false }}">
+                    <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+                      <thead>
+                        <tr style="background:var(--surface-2)">
+                          <sc-for list="{{ resultadoCols }}" as="col" hint-placeholder-count="4">
+                            <th style="text-align:left;padding:8px 12px;font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap">{{ col }}</th>
+                          </sc-for>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ resultadoRows }}" as="row" hint-placeholder-count="5">
+                          <tr style="border-top:1px solid var(--line-soft)">
+                            <sc-for list="{{ row }}" as="cel" hint-placeholder-count="4">
+                              <td style="padding:7px 12px;font-family:'Fragment Mono',monospace;font-size:11.5px;color:var(--text-2);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cel }}</td>
+                            </sc-for>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                    <div style="padding:9px 14px;border-top:1px solid var(--line-soft);font-size:11.5px;color:var(--text-faint);display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                      <span>{{ resultadoNota }}</span>
+                      <span style="margin-left:auto;font-family:'Fragment Mono',monospace">{{ resultadoContagem }}</span>
+                      <button type="button" onClick="{{ copiarResultado }}" data-dica="Copia a tabela inteira — abra o Excel e cole com Ctrl+V." onMouseEnter="{{ mostrarDica }}" onMouseLeave="{{ esconderDica }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:5px 11px;font-size:11.5px;color:var(--text-soft)" style-hover="background:var(--surface-2)">{{ copiarLabel }}</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- ============ Manual prático ============ -->
+      <sc-if value="{{ isManual }}" hint-placeholder-val="{{ false }}">
+        <section data-screen-label="Manual prático" style="max-width:720px;animation:fadeup 0.25s ease">
+          <h1 style="font-family:'Newsreader',serif;font-weight:600;font-size:24px;margin:0 0 4px">Manual prático</h1>
+          <p style="margin:0 0 8px;font-size:13px;color:var(--text-muted)">O GIVA em 30 segundos: os analistas enviam planilhas fiscais e o sistema devolve cada linha conferida e completada. O seu papel aqui é cuidar da base — aprovar atualizações, conferir alíquotas e corrigir categorias. Nada que você faz altera planilhas já processadas.</p>
+          <p style="margin:0 0 20px;font-size:12.5px;color:var(--text-faint)">Prefere ver na prática? <a href="#" onClick="{{ iniciarTourLink }}">Faça o tour guiado (2 min)</a>.</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ manualView }}" as="m" hint-placeholder-count="6">
+              <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card)">
+                <button type="button" onClick="{{ m.toggle }}"
+                  style="display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;border:none;background:transparent;text-align:left;border-radius:14px"
+                  style-hover="background:var(--surface-2)">
+                  <span style="flex:1;font-size:14px;font-weight:600;color:var(--text)">{{ m.titulo }}</span>
+                  <span style="font-size:11px;color:var(--text-faint)">{{ m.seta }}</span>
+                </button>
+                <sc-if value="{{ m.aberto }}" hint-placeholder-val="{{ false }}">
+                  <ol style="margin:0;padding:0 16px 14px 34px;display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ m.passos }}" as="passo" hint-placeholder-count="4">
+                      <li style="font-size:13px;color:var(--text-soft);line-height:1.5">{{ passo }}</li>
+                    </sc-for>
+                  </ol>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <!-- ===== Tour guiado ===== -->
+  <sc-if value="{{ tourAtivo }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:100;width:350px;background:var(--card);border:1px solid var(--accent-line);border-radius:14px;box-shadow:var(--sh-pop);padding:18px;animation:fadeup 0.25s ease">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent-strong)">Tour guiado</span>
+        <span style="font-size:11px;color:var(--text-faint)">{{ tourPasso }} de {{ tourTotal }}</span>
+        <button type="button" onClick="{{ tourFechar }}" style="margin-left:auto;border:none;background:transparent;color:var(--text-faint);font-size:14px;padding:2px 6px" style-hover="color:var(--text)">✕</button>
+      </div>
+      <div style="font-family:'Newsreader',serif;font-size:17px;font-weight:600;margin-bottom:6px">{{ tourTitulo }}</div>
+      <div style="font-size:13px;color:var(--text-soft);line-height:1.55;margin-bottom:14px">{{ tourTexto }}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <sc-if value="{{ tourTemAnterior }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ tourAnt }}" style="border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 13px;font-size:12.5px;color:var(--text-soft)" style-hover="background:var(--surface-2)">Anterior</button>
+        </sc-if>
+        <button type="button" onClick="{{ tourProx }}" style="border:none;background:var(--accent);color:var(--accent-ink);border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:600" style-hover="background:var(--accent-strong)">{{ tourProxLabel }}</button>
+        <button type="button" onClick="{{ tourFechar }}" style="margin-left:auto;border:none;background:transparent;color:var(--text-faint);font-size:12px;text-decoration:underline">Pular — não mostrar de novo</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ===== Dica (tooltip) ===== -->
+  <sc-if value="{{ tipVisivel }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:{{ tipX }}px;top:{{ tipY }}px;z-index:200;max-width:260px;background:var(--text);color:var(--bg);border-radius:9px;padding:8px 11px;font-size:12px;line-height:1.45;box-shadow:var(--sh-pop);pointer-events:none">{{ tipTexto }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;temaPadrao&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;system&quot;, &quot;light&quot;, &quot;dark&quot;], &quot;default&quot;: &quot;system&quot;, &quot;tsType&quot;: &quot;'system'|'light'|'dark'&quot;, &quot;section&quot;: &quot;Aparência&quot;}, &quot;faixaDemo&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Aparência&quot;}, &quot;confirmarPromocao&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamento&quot;}, &quot;tourAutomatico&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamento&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+
+    const FAROL = {
+      verde:    { bg: 'var(--verde-bg)',    tx: 'var(--verde-tx)',    dot: 'var(--dot-verde)' },
+      amarelo:  { bg: 'var(--amarelo-bg)',  tx: 'var(--amarelo-tx)',  dot: 'var(--dot-amarelo)' },
+      vermelho: { bg: 'var(--vermelho-bg)', tx: 'var(--vermelho-tx)', dot: 'var(--dot-vermelho)' },
+      cinza:    { bg: 'var(--cinza-bg)',    tx: 'var(--cinza-tx)',    dot: 'var(--dot-cinza)' },
+    };
+    this.FAROL = FAROL;
+
+    this.VALID = {
+      validada:                     { label: 'conferida na fonte oficial', farol: 'verde' },
+      confirmada_fonte_secundaria:  { label: 'conferida em fonte secundária', farol: 'amarelo' },
+      divergencia_entre_fontes:     { label: 'fontes não batem — conferir', farol: 'vermelho' },
+      pendente_validacao:           { label: 'ainda não conferida', farol: 'cinza' },
+    };
+
+    this.STATUSES = {
+      ok: { label: 'ok', farol: 'verde' },
+      alerta_similaridade: { label: 'conferir similaridade', farol: 'amarelo' },
+      codigo_alterado_pela_revisao_sh: { label: 'código alterado (revisão SH)', farol: 'amarelo' },
+      pendente_validacao_uf: { label: 'estado pendente de validação', farol: 'amarelo' },
+      periodo_sem_cobertura: { label: 'período sem cobertura', farol: 'amarelo' },
+      requer_revisao: { label: 'requer revisão', farol: 'vermelho' },
+      entrada_invalida: { label: 'entrada inválida', farol: 'vermelho' },
+      codigo_inexistente: { label: 'código inexistente', farol: 'vermelho' },
+    };
+
+    this.CATEGORIAS = ['Material de manutenção','Peça de máquina','Material elétrico','Material de limpeza','EPI','Material de escritório e informática','Gás','Produto químico','Ferramentas','Combustível e lubrificante','Material de construção','Serviço','Alimentação','Material de embalagem','Brindes','Material de jardinagem','Material de laboratório','Indefinido'];
+
+    this.NCM_TABELA = [
+      { codigo: '64039990', descricao: 'Calçados com sola exterior de couro — outros', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '84713019', descricao: 'Máquinas p/ processamento de dados, portáteis, ≤10kg — outras', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '27101921', descricao: 'Óleos combustíveis (gasóleo) — enxofre ≤10mg/kg', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '30049069', descricao: 'Medicamentos p/ venda a retalho — outros', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '73089010', descricao: 'Construções e partes, de ferro ou aço', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '85176259', descricao: 'Aparelhos p/ transmissão/recepção de dados — outros', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '28362010', descricao: 'Carbonato de sódio (barrilha)', inicio: '2017-01-01', ato: 'Camex 92/2016' },
+      { codigo: '84672100', descricao: 'Ferramentas eletromecânicas — furadeiras', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '48201000', descricao: 'Cadernos, blocos de notas e artigos semelhantes', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '39262000', descricao: 'Vestuário e acessórios de plástico', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '85444900', descricao: 'Condutores elétricos p/ tensão ≤1000V — outros', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+      { codigo: '22071090', descricao: 'Álcool etílico não desnaturado ≥80% vol — outros', inicio: '2022-04-01', ato: 'Gecex 272/2021' },
+    ];
+
+    this.LINHAS = [
+      { lote: 1, numero: 1, ncm: '6403.99.90', periodo: '2026-05', descricao: 'Botina de segurança em couro', uf: 'SP', status: 'ok', categoria: 'EPI', aliquota: '18%' },
+      { lote: 1, numero: 3, ncm: '2710.19.21', periodo: '2026-04', descricao: 'Óleo diesel S-10 rodoviário', uf: 'MG', status: 'alerta_similaridade', categoria: 'Combustível e lubrificante', aliquota: 'específica' },
+      { lote: 1, numero: 4, ncm: '3004.90.69', periodo: '2026-05', descricao: 'Dipirona sódica 500mg cx', uf: 'RJ', status: 'requer_revisao', categoria: 'Indefinido', aliquota: '20%' },
+      { lote: 1, numero: 5, ncm: '7308.90.10', periodo: '2026-05', descricao: 'Estrutura metálica p/ galpão', uf: 'PE', status: 'pendente_validacao_uf', categoria: 'Material de construção', aliquota: '—' },
+      { lote: 1, numero: 6, ncm: '9999.99.99', periodo: '2026-05', descricao: 'Item diverso sem código', uf: 'BA', status: 'codigo_inexistente', categoria: '—', aliquota: '—' },
+      { lote: 1, numero: 7, ncm: '640399', periodo: '2026-05', descricao: 'Botina PVC cano curto', uf: 'SP', status: 'entrada_invalida', categoria: '—', aliquota: '—' },
+      { lote: 3, numero: 9, ncm: '2836.20.10', periodo: '2019-03', descricao: 'Barrilha (carbonato de sódio)', uf: 'PR', status: 'periodo_sem_cobertura', categoria: 'Produto químico', aliquota: '—' },
+      { lote: 3, numero: 12, ncm: '3926.20.00', periodo: '2026-05', descricao: 'Avental de plástico', uf: 'SP', status: 'codigo_alterado_pela_revisao_sh', categoria: 'EPI', aliquota: '18%' },
+      { lote: 3, numero: 14, ncm: '8544.49.00', periodo: '2026-05', descricao: 'Cabo elétrico flexível 2,5mm²', uf: 'SP', status: 'ok', categoria: 'Material elétrico', aliquota: '18%' },
+      { lote: 3, numero: 88, ncm: '4015.19.00', periodo: '2026-04', descricao: 'Luva nitrílica descartável', uf: 'SP', status: 'ok', categoria: 'EPI', aliquota: '18%' },
+    ];
+
+    this.REGRAS_NCM = [
+      { prefixo: '3926', categoria: 'Material de embalagem' },
+      { prefixo: '392620', categoria: 'EPI' },
+      { prefixo: '8467', categoria: 'Ferramentas' },
+      { prefixo: '8544', categoria: 'Material elétrico' },
+      { prefixo: '2710', categoria: 'Combustível e lubrificante' },
+      { prefixo: '7308', categoria: 'Material de construção' },
+      { prefixo: '4820', categoria: 'Material de escritório e informática' },
+      { prefixo: '2836', categoria: 'Produto químico' },
+      { prefixo: '6403', categoria: 'EPI' },
+    ];
+    this.REGRAS_PALAVRA = [
+      { palavra: 'luva', categoria: 'EPI' },
+      { palavra: 'luva', categoria: 'Material de limpeza' },
+      { palavra: 'botina', categoria: 'EPI' },
+      { palavra: 'furadeira', categoria: 'Ferramentas' },
+      { palavra: 'diesel', categoria: 'Combustível e lubrificante' },
+      { palavra: 'caderno', categoria: 'Material de escritório e informática' },
+    ];
+
+    this.TOUR = [
+      { titulo: 'Bem-vindo à operação do GIVA', texto: 'Aqui você cuida da base de dados que confere as planilhas dos analistas. São 6 áreas — vamos passar por cada uma. Você pode sair do tour a qualquer momento.', screen: 'b1' },
+      { titulo: 'Atualizações da base', texto: 'Quando chega uma tabela nova de códigos ou alíquotas, ela espera aqui. Você vê exatamente o que muda antes de aprovar — nada entra no sistema sem o seu OK.', screen: 'b1' },
+      { titulo: 'Alíquotas por estado', texto: 'A alíquota de ICMS de cada estado, com a fonte de onde veio. Conferiu no site da SEFAZ? Clique no selo colorido e marque como conferida.', screen: 'b2' },
+      { titulo: 'Ajustes do sistema', texto: 'Controles de rigor da análise, em linguagem simples: cada um explica o que acontece se você aumentar ou diminuir. Toda mudança fica registrada.', screen: 'b3' },
+      { titulo: 'Correções de categoria', texto: 'Um produto caiu na categoria errada? Corrija aqui uma vez e o sistema acerta em todos os próximos processamentos.', screen: 'b4' },
+      { titulo: 'Contestações', texto: 'Quando um analista discorda de um resultado, o aviso chega aqui. Use o botão “Encaminhar” para corrigir a base ou responder.', screen: 'b5' },
+      { titulo: 'Consultas prontas', texto: 'Perguntas frequentes à base, como filtros de planilha: escolha, preencha, execute. E todo resultado tem o botão “Copiar p/ Excel”.', screen: 'consulta' },
+      { titulo: 'Pronto!', texto: 'Dica final: passe o mouse sobre qualquer botão para ver uma explicação rápida. E o Manual prático (menu Ajuda, à esquerda) tem o passo a passo de cada tarefa.', screen: 'manual' },
+    ];
+
+    this.MANUAL = [
+      { key: 'aprovar', titulo: 'Aprovar uma atualização da base', passos: [
+        'Abra “Atualizações da base” no menu à esquerda.',
+        'Na linha com o selo “aguardando aprovação”, clique no botão ⋯.',
+        'Clique em “Ver o que muda” e confira os números: novos, alterados e removidos.',
+        'Se estiver de acordo, clique “Aprovar e aplicar” e confirme. Se algo estiver errado, clique “Descartar” — nada é alterado.',
+        'A aprovação fica registrada com seu nome e a data.' ] },
+      { key: 'aliquota', titulo: 'Conferir a alíquota de um estado', passos: [
+        'Abra “Alíquotas por estado”.',
+        'Localize o estado — a coluna “Fonte” mostra de onde o valor veio.',
+        'Confira o valor no site oficial da SEFAZ do estado.',
+        'Clique no selo colorido da linha e escolha a situação certa (ex.: “conferida na fonte oficial”).',
+        'Selos vermelhos (“fontes não batem”) são os mais urgentes.' ] },
+      { key: 'categoria', titulo: 'Corrigir a categoria de um produto', passos: [
+        'Abra “Correções de categoria” e clique em “Nova correção”.',
+        'Informe o código NCM completo (8 dígitos).',
+        'Escolha a categoria certa na lista.',
+        'Escreva o motivo — é obrigatório, para que qualquer pessoa entenda depois.',
+        'Clique “Salvar correção”. Vale para todos os próximos processamentos; planilhas antigas não mudam.' ] },
+      { key: 'contestacao', titulo: 'Responder uma contestação de analista', passos: [
+        'Abra “Contestações” — as abertas têm selo amarelo.',
+        'Leia o texto do analista e clique em “Encaminhar ▾”.',
+        'Escolha: corrigir a categoria, mandar conferir a alíquota do estado, ou só responder.',
+        'Escreva a resolução e clique “Resolver”. O analista vê sua resposta.' ] },
+      { key: 'consultar', titulo: 'Consultar a base e levar para o Excel', passos: [
+        'Abra “Consultas prontas” e escolha a pergunta à esquerda.',
+        'Preencha os campos (ex.: o código NCM ou o estado).',
+        'Clique “Executar” — o resultado aparece como uma tabela.',
+        'Clique “Copiar p/ Excel”, abra sua planilha e cole com Ctrl+V.' ] },
+      { key: 'selos', titulo: 'O que significam as cores dos selos', passos: [
+        'Verde — tudo certo, ou já conferido por alguém.',
+        'Amarelo — atenção: algo espera a sua ação ou conferência.',
+        'Vermelho — problema: fontes não batem, ou a linha precisa de revisão.',
+        'Cinza — ainda não conferido.',
+        'A cor nunca vem sozinha: o texto do selo sempre diz o que é.' ] },
+    ];
+
+    this.state = {
+      screen: 'b1',
+      theme: 'system',
+      menu: null,
+      tour: null,
+      manualAberto: 'aprovar',
+      tip: null,
+      diffAberto: null,
+      confirmando: null,
+      cargas: [
+        { id: 4, fonte: 'Classif/Siscomex (snapshot semanal)', arquivo: 'classif_ncm_2026-07-01.json', coleta: '01/07/2026', status: 'staging',
+          diff: { novos: 12, alterados: 37, removidos: 3, amostra: [
+            { codigo: '85287220', tipo: 'alterado', detalhe: '“Aparelhos receptores de TV…” → redação Gecex 415/2026' },
+            { codigo: '38249979', tipo: 'novo', detalhe: 'Novo código — “Misturas contendo grafeno”' },
+            { codigo: '84719012', tipo: 'removido', detalhe: 'Extinto — correlaciona p/ 8471.90.14' },
+          ] } },
+        { id: 2, fonte: 'SEFAZ (consolidado alíquotas)', arquivo: 'icms_hist_q2_2026.csv', coleta: '30/06/2026', status: 'staging',
+          diff: { novos: 5, alterados: 2, removidos: 0, amostra: [
+            { codigo: 'GO', tipo: 'alterado', detalhe: 'modal 17,0% → 19,0% (vig. 2026-04-01)' },
+            { codigo: 'CE', tipo: 'alterado', detalhe: 'modal 18,0% → 20,0% (vig. 2026-01-01)' },
+            { codigo: 'RN', tipo: 'novo', detalhe: 'vigência 2026 incluída (pendente de validação)' },
+          ] } },
+        { id: 3, fonte: 'RICMS/SP (atualização)', arquivo: 'ricms_sp_2026.csv', coleta: '28/06/2026', status: 'aprovada', por: 'M. Ferraz', em: '29/06/2026' },
+        { id: 1, fonte: 'Seed de referência (demonstração)', arquivo: 'seed_2026_demo.sql', coleta: '15/06/2026', status: 'aprovada', por: 'sistema', em: '15/06/2026' },
+      ],
+      ufs: [
+        { uf: 'SP', aliquota: '18,0%', vigencia: 'desde 2024-01', fonte: 'RICMS/SP, Dec. 45.490/2000', status: 'validada' },
+        { uf: 'RJ', aliquota: '20,0%', vigencia: 'desde 2023-04', fonte: 'RICMS/RJ, Dec. 27.427/2000', status: 'validada' },
+        { uf: 'MG', aliquota: '18,0%', vigencia: 'desde 2024-01', fonte: 'RICMS/MG, Dec. 48.589/2023', status: 'validada' },
+        { uf: 'RS', aliquota: '17,0%', vigencia: 'desde 2024-01', fonte: 'RICMS/RS, Dec. 37.699/1997', status: 'validada' },
+        { uf: 'PR', aliquota: '19,5%', vigencia: 'desde 2024-03', fonte: 'consolidado (2 fontes)', status: 'pendente_validacao' },
+        { uf: 'GO', aliquota: '19,0%', vigencia: 'desde 2026-04', fonte: 'consolidado', status: 'pendente_validacao' },
+        { uf: 'CE', aliquota: '20,0%', vigencia: 'desde 2026-01', fonte: 'consolidado', status: 'confirmada_fonte_secundaria' },
+        { uf: 'BA', aliquota: '20,5%', vigencia: 'desde 2023-02', fonte: 'fonte secundária', status: 'confirmada_fonte_secundaria' },
+        { uf: 'PE', aliquota: '18,0%', vigencia: 'desde 2023-01', fonte: 'consolidado ≠ RICMS/PE', status: 'divergencia_entre_fontes' },
+        { uf: 'PI', aliquota: '21,0%', vigencia: 'desde 2024-01', fonte: 'consolidado ≠ portal SEFAZ', status: 'divergencia_entre_fontes' },
+        { uf: 'RN', aliquota: '20,0%', vigencia: 'desde 2026-01', fonte: 'carga #2 (staging)', status: 'pendente_validacao' },
+        { uf: 'SC', aliquota: '17,0%', vigencia: 'desde 2024-01', fonte: 'RICMS/SC, Dec. 2.870/2001', status: 'validada' },
+      ],
+      params: [
+        { nome: 't_ok', rotulo: 'Rigor da comparação de descrições', valor: '0.85',
+          descricao: 'O quanto a descrição da planilha precisa parecer com a descrição oficial do NCM para a linha passar sem aviso.',
+          efeito: 'Aumentar = mais linhas recebem o aviso "conferir similaridade". Diminuir = menos avisos, mas erros podem passar.' },
+        { nome: 't_rev', rotulo: 'Limite para exigir revisão humana', valor: '0.55',
+          descricao: 'Abaixo desta semelhança, a linha é marcada em vermelho como "requer revisão" e vai para a fila do analista.',
+          efeito: 'Aumentar = mais linhas paradas para revisão manual. Diminuir = mais linhas seguem só com aviso amarelo.' },
+        { nome: 'categoria_versao_vigente', rotulo: 'Versão do mapa de categorias', valor: 'v4',
+          descricao: 'Qual versão das regras NCM→categoria (as 18 categorias EFD) o sistema usa ao classificar as planilhas.',
+          efeito: 'Trocar a versão muda a categoria sugerida em novos processamentos. Lotes antigos não são alterados.' },
+        { nome: 'expurgo_lotes_meses', rotulo: 'Tempo de guarda dos arquivos (meses)', valor: '36',
+          descricao: 'Por quantos meses os arquivos enviados pelos analistas ficam guardados antes de serem apagados (LGPD).',
+          efeito: 'Aumentar = arquivos disponíveis por mais tempo. Diminuir = limpeza mais cedo; downloads antigos expiram.' },
+      ],
+      paramEdits: {},
+      histAberto: null,
+      excecoes: [
+        { ncm: '39262000', categoria: 'EPI', justificativa: 'Avental plástico usado como EPI na operação', origem: 'contestação #150', criadoEm: '19/06/2026' },
+        { ncm: '40151900', categoria: 'EPI', justificativa: 'Luva nitrílica é EPI, não limpeza', origem: 'contestação #150', criadoEm: '19/06/2026' },
+        { ncm: '22071090', categoria: 'Produto químico', justificativa: 'Álcool como insumo industrial, não bebida', origem: 'curadoria', criadoEm: '02/05/2026' },
+      ],
+      formExcecaoAberto: false,
+      fe: { ncm: '', categoria: 'EPI', justificativa: '' },
+      feErro: null,
+      contestacoes: [
+        { id: 162, lote: 1, linha: 5, tipo: 'validação de alíquota', texto: 'PE consta pendente, mas o RICMS/PE já publicou a alíquota de 2026 — dá para validar.', status: 'aberta', resolucao: null, criadoEm: '05/07/2026' },
+        { id: 158, lote: 1, linha: 4, tipo: 'validação de alíquota', texto: 'Dipirona em RJ tem tratamento específico; a alíquota geral de 20% pode não se aplicar.', status: 'aberta', resolucao: null, criadoEm: '02/07/2026' },
+        { id: 155, lote: 3, linha: 12, tipo: 'exceção de categoria', texto: 'Avental de plástico deveria ser EPI, não embalagem.', status: 'aberta', resolucao: null, criadoEm: '28/06/2026' },
+        { id: 150, lote: 3, linha: 88, tipo: 'exceção de categoria', texto: 'Luva nitrílica deveria ser EPI, não "Indefinido".', status: 'resolvida', resolucao: 'Exceção criada — 4015.19.00 → EPI.', criadoEm: '19/06/2026' },
+      ],
+      encaminhando: null,
+      enc: { destino: 'excecao', ncm: '', categoria: 'EPI', resolucao: '' },
+      script: 'ncm',
+      q: { ncm: '', periodo: '', uf: 'SP', status: 'todos', lUf: 'todos', alvo: '', sql: 'SELECT * FROM ufs LIMIT 10' },
+      resultado: null,
+      auditoria: [
+        { quando: '05/07/2026 09:12', quem: 'm.ferraz', acao: 'uf_status_validacao_atualizado', alvo: 'aliquota_icms_modal:CE', mudanca: 'pendente_validacao → confirmada_fonte_secundaria' },
+        { quando: '29/06/2026 09:00', quem: 'm.ferraz', acao: 'carga_promovida', alvo: 'carga:3', mudanca: 'staging → produção (1.204 registros)' },
+        { quando: '19/06/2026 10:31', quem: 'm.ferraz', acao: 'excecao_categoria_criada', alvo: 'regras_excecao:40151900:v4', mudanca: 'Indefinido → EPI' },
+        { quando: '19/06/2026 10:30', quem: 'm.ferraz', acao: 'contestacao_encaminhada', alvo: 'contestacao:150', mudanca: 'aberta → resolvida (exceção)' },
+        { quando: '11/06/2026 15:04', quem: 'a.lima', acao: 'parametro_atualizado', alvo: 'parametro:t_ok', mudanca: '0.80 → 0.85' },
+        { quando: '02/05/2026 11:40', quem: 'm.ferraz', acao: 'excecao_categoria_criada', alvo: 'regras_excecao:22071090:v4', mudanca: '(nova) → Produto químico' },
+      ],
+    };
+  }
+
+  componentDidMount() {
+    let t = this.props.temaPadrao ?? 'system';
+    try { t = localStorage.getItem('giva-op-theme') || t; } catch (e) {}
+    this.aplicarTema(t);
+    // Primeira visita: abre o tour guiado automaticamente (uma vez só).
+    let visto = false;
+    try { visto = localStorage.getItem('giva-op-tour-visto') === '1'; } catch (e) {}
+    if (!visto && (this.props.tourAutomatico ?? true)) {
+      this.setState({ tour: 0, screen: this.TOUR[0].screen });
+    }
+  }
+
+  marcarTourVisto() {
+    try { localStorage.setItem('giva-op-tour-visto', '1'); } catch (e) {}
+  }
+
+  aplicarTema(t) {
+    const root = document.documentElement;
+    if (t === 'system') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', t);
+    try { localStorage.setItem('giva-op-theme', t); } catch (e) {}
+    this.setState({ theme: t });
+  }
+
+  audit(acao, alvo, mudanca) {
+    const agora = new Date();
+    const quando = agora.toLocaleDateString('pt-BR') + ' ' +
+      String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+    this.setState((s) => ({ auditoria: [{ quando, quem: 'm.ferraz', acao, alvo, mudanca }, ...s.auditoria] }));
+  }
+
+  badge(farol, label) {
+    const c = this.FAROL[farol];
+    return { badgeBg: c.bg, badgeTx: c.tx, badgeDot: c.dot, badgeLabel: label };
+  }
+
+  // ---------- consultas ----------
+  executar() {
+    const { script, q } = this.state;
+    const norm = (v) => (v || '').replace(/[^0-9]/g, '');
+    let r;
+    if (script === 'ncm') {
+      const cod = norm(q.ncm);
+      const termo = (q.ncm || '').toLowerCase().trim();
+      const hits = this.NCM_TABELA.filter((n) =>
+        (cod.length >= 4 && n.codigo.startsWith(cod)) ||
+        (cod.length < 4 && termo && n.descricao.toLowerCase().includes(termo)));
+      r = {
+        cols: ['código', 'descrição oficial', 'vigente desde', 'ato legal'],
+        rows: hits.map((n) => [n.codigo.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'), n.descricao, n.inicio, n.ato]),
+        nota: 'fonte: ncm_vigente · carga #4 · coleta 01/07/2026' + (q.periodo ? ' · período ' + q.periodo + ' respondido pela redação vigente (histórico decenal em carga)' : ''),
+      };
+      if (!termo) r = { erro: 'Informe um código NCM (≥4 dígitos) ou um termo da descrição.' };
+      else if (!hits.length) r = { erro: 'Nenhum NCM encontrado para “' + q.ncm + '”. Verifique zeros à esquerda — nunca à direita.' };
+    } else if (script === 'aliquota') {
+      const u = this.state.ufs.find((x) => x.uf === q.uf);
+      if (!u) r = { erro: 'UF não encontrada.' };
+      else r = {
+        cols: ['UF', 'período', 'alíquota modal', 'vigência', 'validação', 'fonte'],
+        rows: [[u.uf, q.periodo || 'corrente', u.aliquota, u.vigencia, this.VALID[u.status].label, u.fonte]],
+        nota: 'fonte: aliquota_icms_modal · modal nominal, sem FECP (playbook §5)',
+      };
+    } else if (script === 'regras') {
+      const cod = norm(q.ncm);
+      if (cod.length < 4) r = { erro: 'Informe um NCM com pelo menos 4 dígitos.' };
+      else {
+        const rows = [];
+        const exc = this.state.excecoes.find((e) => e.ncm === cod);
+        if (exc) rows.push(['1. exceção (NCM exato)', cod, exc.categoria, exc.justificativa]);
+        const faixas = this.REGRAS_NCM.filter((rg) => cod.startsWith(rg.prefixo)).sort((a, b) => b.prefixo.length - a.prefixo.length);
+        faixas.forEach((f, i) => rows.push(['2. faixa de NCM' + (i === 0 ? ' (vence: mais específica)' : ''), f.prefixo + '*', f.categoria, 'regra_ncm_categoria v4']));
+        this.REGRAS_PALAVRA.forEach((p) => rows.push(['3. palavra-chave', '“' + p.palavra + '”', p.categoria, 'fallback pela descrição']));
+        r = rows.length
+          ? { cols: ['precedência', 'gatilho', 'categoria', 'detalhe'], rows, nota: 'precedência do categorizador: exceção → faixa NCM (prefixo mais longo) → palavra-chave → Indefinido' }
+          : { erro: 'Nenhuma regra casa com ' + q.ncm + ' — cairia em Indefinido (sem_match).' };
+      }
+    } else if (script === 'linhas') {
+      const hits = this.LINHAS.filter((l) =>
+        (q.status === 'todos' || l.status === q.status) && (q.lUf === 'todos' || l.uf === q.lUf));
+      r = {
+        cols: ['lote', 'linha', 'NCM', 'período', 'descrição', 'UF', 'status', 'categoria', 'alíquota'],
+        rows: hits.map((l) => [l.lote, l.numero, l.ncm, l.periodo, l.descricao, l.uf, this.STATUSES[l.status] ? this.STATUSES[l.status].label : l.status, l.categoria, l.aliquota]),
+        nota: 'fonte: lote_linha (join lote) · statuses do contrato DT-01..04',
+      };
+      if (!hits.length) r = { erro: 'Nenhuma linha com esse filtro.' };
+    } else if (script === 'auditoria') {
+      const f = (q.alvo || '').toLowerCase().trim();
+      const hits = this.state.auditoria.filter((a) => !f || a.quem.includes(f) || a.acao.includes(f) || a.alvo.toLowerCase().includes(f));
+      r = {
+        cols: ['quando', 'quem', 'ação', 'alvo', 'antes → depois'],
+        rows: hits.map((a) => [a.quando, a.quem, a.acao, a.alvo, a.mudanca]),
+        nota: 'fonte: auditoria · imutável, ordenada do mais recente',
+      };
+      if (!hits.length) r = { erro: 'Nada na auditoria para “' + q.alvo + '”.' };
+    } else if (script === 'saude') {
+      const pend = this.state.ufs.filter((u) => u.status !== 'validada').length;
+      const stag = this.state.cargas.filter((c) => c.status === 'staging').length;
+      const abertas = this.state.contestacoes.filter((c) => c.status === 'aberta').length;
+      r = {
+        cols: ['base', 'cobertura', 'situação'],
+        rows: [
+          ['ncm_vigente', '10.542 códigos', 'carga #4 em staging aguardando revisão'],
+          ['ncm_historico', 'revisão SH 2022 (seed)', 'export "Alterações Históricas" pendente (roadmap F5)'],
+          ['aliquota_icms_modal', this.state.ufs.length + ' UFs com vigência corrente', pend + ' UFs não validadas'],
+          ['regras de categoria', '18 categorias · v4', this.state.excecoes.length + ' exceções ativas'],
+          ['cargas', String(this.state.cargas.length) + ' registradas', stag + ' em staging'],
+          ['contestações', String(this.state.contestacoes.length) + ' no total', abertas + ' abertas'],
+        ],
+        nota: 'visão compilada de carga, ncm_vigente, aliquota_icms_modal, regras_excecao e contestacao',
+      };
+    } else if (script === 'sql') {
+      r = this.executarSql(q.sql || '');
+    }
+    this.setState({ resultado: r });
+  }
+
+  executarSql(sql) {
+    const s = sql.trim().replace(/;\s*$/, '');
+    if (!/^select\s/i.test(s)) return { erro: 'Somente leitura: apenas SELECT é permitido.' };
+    const m = s.match(/^select\s+(count\(\*\)|\*)\s+from\s+([a-z_]+)(?:\s+limit\s+(\d+))?$/i);
+    if (!m) return { erro: 'No modo demo o SQL suportado é: SELECT * | COUNT(*) FROM <tabela> [LIMIT n].' };
+    const tabelas = {
+      ufs: this.state.ufs.map((u) => ({ uf: u.uf, aliquota_modal: u.aliquota, vigencia: u.vigencia, status_validacao: u.status, fonte: u.fonte })),
+      cargas: this.state.cargas.map((c) => ({ id: c.id, fonte: c.fonte, arquivo_bruto: c.arquivo, data_coleta: c.coleta, status: c.status })),
+      excecoes: this.state.excecoes.map((e) => ({ ncm: e.ncm, categoria: e.categoria, justificativa: e.justificativa, origem: e.origem })),
+      contestacoes: this.state.contestacoes.map((c) => ({ id: c.id, lote_id: c.lote, numero_linha: c.linha, tipo: c.tipo, status: c.status })),
+      parametros: this.state.params.map((p) => ({ nome: p.nome, valor: p.valor })),
+      auditoria: this.state.auditoria.map((a) => ({ quando: a.quando, quem: a.quem, acao: a.acao, alvo: a.alvo })),
+      ncm_vigente: this.NCM_TABELA.map((n) => ({ codigo: n.codigo, descricao: n.descricao, data_inicio: n.inicio, ato: n.ato })),
+      lote_linha: this.LINHAS.map((l) => ({ lote_id: l.lote, numero: l.numero, ncm: l.ncm, periodo: l.periodo, uf: l.uf, status: l.status, categoria: l.categoria })),
+    };
+    const nome = m[2].toLowerCase();
+    const dados = tabelas[nome];
+    if (!dados) return { erro: 'Tabela “' + nome + '” não existe. Disponíveis: ' + Object.keys(tabelas).join(' · ') };
+    if (/^count/i.test(m[1])) return { cols: ['count'], rows: [[dados.length]], nota: nome + ' · ' + dados.length + ' registros' };
+    const lim = m[3] ? parseInt(m[3], 10) : 50;
+    const slice = dados.slice(0, lim);
+    const cols = slice.length ? Object.keys(slice[0]) : [];
+    return { cols, rows: slice.map((d) => cols.map((c) => String(d[c]))), nota: nome + (dados.length > lim ? ' · LIMIT ' + lim + ' de ' + dados.length : '') };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const set = (patch) => this.setState(patch);
+    const stopGo = (fn) => (e) => { if (e && e.stopPropagation) e.stopPropagation(); fn(); };
+
+    // nav
+    const stagingN = s.cargas.filter((c) => c.status === 'staging').length;
+    const divergN = s.ufs.filter((u) => u.status === 'divergencia_entre_fontes').length;
+    const abertasN = s.contestacoes.filter((c) => c.status === 'aberta').length;
+    const navItem = (key, label, dica) => ({
+      label, dica: dica || '', badge: false,
+      bg: s.screen === key ? 'var(--accent-soft)' : 'transparent',
+      cor: s.screen === key ? 'var(--text)' : 'var(--text-soft)',
+      peso: s.screen === key ? '600' : '400',
+      go: () => set({ screen: key, menu: null }),
+    });
+
+    // B1
+    const cargasView = s.cargas.map((c) => {
+      const staging = c.status === 'staging';
+      const b = staging ? this.badge('amarelo', 'aguardando aprovação') : this.badge('verde', 'aprovada · ' + (c.por || ''));
+      const confirmando = s.confirmando === c.id;
+      return {
+        fonte: c.fonte, arquivo: c.arquivo, coleta: c.coleta, staging,
+        ...b,
+        menuAberto: s.menu === 'carga' + c.id,
+        diffAberto: s.diffAberto === c.id,
+        diffLabel: s.diffAberto === c.id ? 'Fechar comparação' : 'Ver o que muda',
+        diffNovos: c.diff ? c.diff.novos : 0,
+        diffAlterados: c.diff ? c.diff.alterados : 0,
+        diffRemovidos: c.diff ? c.diff.removidos : 0,
+        amostra: (c.diff ? c.diff.amostra : []).map((d) => ({
+          codigo: d.codigo, detalhe: d.detalhe,
+          tipo: d.tipo === 'novo' ? '+ novo' : d.tipo === 'removido' ? '− removido' : '~ alterado',
+          cor: d.tipo === 'novo' ? 'var(--verde-tx)' : d.tipo === 'removido' ? 'var(--vermelho-tx)' : 'var(--amarelo-tx)',
+        })),
+        promoverLabel: confirmando ? 'Tem certeza? Confirmar' : 'Aprovar e aplicar',
+        abrirMenu: stopGo(() => set({ menu: s.menu === 'carga' + c.id ? null : 'carga' + c.id })),
+        verDiff: stopGo(() => set({ diffAberto: s.diffAberto === c.id ? null : c.id, menu: null })),
+        promover: stopGo(() => {
+          const exigeConfirma = this.props.confirmarPromocao ?? true;
+          if (exigeConfirma && s.confirmando !== c.id) { set({ confirmando: c.id, menu: null, diffAberto: c.id }); return; }
+          this.setState((st) => ({
+            cargas: st.cargas.map((x) => x.id === c.id ? { ...x, status: 'aprovada', por: 'm.ferraz' } : x),
+            menu: null, diffAberto: null, confirmando: null,
+          }));
+          this.audit('carga_promovida', 'carga:' + c.id, 'staging → produção');
+        }),
+        rejeitar: stopGo(() => {
+          this.setState((st) => ({ cargas: st.cargas.filter((x) => x.id !== c.id), menu: null, diffAberto: null, confirmando: null }));
+          this.audit('carga_rejeitada', 'carga:' + c.id, 'staging → descartada');
+        }),
+      };
+    });
+
+    // B2
+    const ufsView = s.ufs.map((u) => {
+      const v = this.VALID[u.status];
+      return {
+        uf: u.uf, aliquota: u.aliquota, vigencia: u.vigencia, fonte: u.fonte,
+        ...this.badge(v.farol, v.label),
+        menuAberto: s.menu === 'uf' + u.uf,
+        abrirMenu: stopGo(() => set({ menu: s.menu === 'uf' + u.uf ? null : 'uf' + u.uf })),
+        opcoes: Object.keys(this.VALID).map((k) => ({
+          label: this.VALID[k].label,
+          dot: this.FAROL[this.VALID[k].farol].dot,
+          set: stopGo(() => {
+            if (k !== u.status) {
+              this.setState((st) => ({ ufs: st.ufs.map((x) => x.uf === u.uf ? { ...x, status: k } : x), menu: null }));
+              this.audit('uf_status_validacao_atualizado', 'aliquota_icms_modal:' + u.uf, u.status + ' → ' + k);
+            } else set({ menu: null });
+          }),
+        })),
+      };
+    });
+
+    // B3
+    const paramsView = s.params.map((p) => {
+      const editado = s.paramEdits[p.nome];
+      const hist = s.auditoria.filter((a) => a.alvo === 'parametro:' + p.nome);
+      return {
+        nome: p.nome, rotulo: p.rotulo, descricao: p.descricao, efeito: p.efeito,
+        valor: editado !== undefined ? editado : p.valor,
+        alterado: editado !== undefined && editado !== p.valor,
+        histAberto: s.histAberto === p.nome,
+        historico: hist,
+        semHistorico: hist.length === 0,
+        salvar: () => {
+          const novo = s.paramEdits[p.nome];
+          this.setState((st) => ({
+            params: st.params.map((x) => x.nome === p.nome ? { ...x, valor: novo } : x),
+            paramEdits: { ...st.paramEdits, [p.nome]: undefined },
+          }));
+          this.audit('parametro_atualizado', 'parametro:' + p.nome, p.valor + ' → ' + novo);
+        },
+        toggleHist: () => set({ histAberto: s.histAberto === p.nome ? null : p.nome }),
+      };
+    });
+
+    // B4
+    const excecoesView = s.excecoes.map((e) => ({
+      ncm: e.ncm.replace(/(\d{4})(\d{2})(\d{2})/, '$1.$2.$3'),
+      categoria: e.categoria, justificativa: e.justificativa, origem: e.origem, criadoEm: e.criadoEm,
+    }));
+
+    // B5
+    const contestacoesView = s.contestacoes.map((ct) => {
+      const aberta = ct.status === 'aberta';
+      const enc = s.encaminhando && s.encaminhando.id === ct.id ? s.encaminhando : null;
+      return {
+        id: ct.id, lote: ct.lote, linha: ct.linha, tipo: ct.tipo, texto: ct.texto,
+        criadoEm: ct.criadoEm, resolucao: ct.resolucao || false, aberta,
+        ...this.badge(aberta ? 'amarelo' : 'verde', aberta ? 'aberta' : 'resolvida'),
+        menuAberto: s.menu === 'ct' + ct.id,
+        encaminhando: !!enc,
+        encEhExcecao: !!enc && enc.destino === 'excecao',
+        encPlaceholder: enc && enc.destino === 'validacao_uf' ? 'Ex.: enviado à fila de validação de PE' : 'Texto da resolução para o analista',
+        abrirMenu: stopGo(() => set({ menu: s.menu === 'ct' + ct.id ? null : 'ct' + ct.id })),
+        encExcecao: stopGo(() => set({ menu: null, encaminhando: { id: ct.id, destino: 'excecao' }, enc: { destino: 'excecao', ncm: '', categoria: 'EPI', resolucao: '' } })),
+        encUf: stopGo(() => set({ menu: null, encaminhando: { id: ct.id, destino: 'validacao_uf' }, enc: { destino: 'validacao_uf', ncm: '', categoria: 'EPI', resolucao: '' } })),
+        encResposta: stopGo(() => set({ menu: null, encaminhando: { id: ct.id, destino: 'resposta' }, enc: { destino: 'resposta', ncm: '', categoria: 'EPI', resolucao: '' } })),
+        confirmarEnc: () => {
+          const dados = s.enc;
+          if (!dados.resolucao.trim()) return;
+          if (dados.destino === 'excecao' && dados.ncm.replace(/[^0-9]/g, '').length === 8) {
+            this.setState((st) => ({
+              excecoes: [{ ncm: dados.ncm.replace(/[^0-9]/g, ''), categoria: dados.categoria, justificativa: dados.resolucao, origem: 'contestação #' + ct.id, criadoEm: new Date().toLocaleDateString('pt-BR') }, ...st.excecoes],
+            }));
+            this.audit('excecao_categoria_criada', 'regras_excecao:' + dados.ncm.replace(/[^0-9]/g, '') + ':v4', '(nova) → ' + dados.categoria);
+          }
+          this.setState((st) => ({
+            contestacoes: st.contestacoes.map((x) => x.id === ct.id ? { ...x, status: 'resolvida', resolucao: dados.resolucao } : x),
+            encaminhando: null,
+          }));
+          this.audit('contestacao_encaminhada', 'contestacao:' + ct.id, 'aberta → resolvida (' + dados.destino + ')');
+        },
+      };
+    });
+
+    // consulta
+    const SCRIPTS = [
+      { key: 'ncm', label: 'Buscar um NCM', sub: 'qual a descrição oficial' },
+      { key: 'aliquota', label: 'Alíquota de um estado', sub: 'quanto é o ICMS e desde quando' },
+      { key: 'regras', label: 'Por que caiu nessa categoria', sub: 'regras que valem p/ um NCM' },
+      { key: 'linhas', label: 'Linhas processadas', sub: 'filtrar por situação e estado' },
+      { key: 'auditoria', label: 'Quem mudou o quê', sub: 'registro de alterações' },
+      { key: 'saude', label: 'Situação da base', sub: 'o que está em dia ou pendente' },
+      { key: 'sql', label: 'Avançado (SQL)', sub: 'para quem conhece SQL' },
+    ];
+    const scriptsNav = SCRIPTS.map((sc) => ({
+      label: sc.label, sub: sc.sub,
+      bg: s.script === sc.key ? 'var(--accent-soft)' : 'transparent',
+      cor: s.script === sc.key ? 'var(--text)' : 'var(--text-soft)',
+      peso: s.script === sc.key ? '600' : '400',
+      selecionar: () => set({ script: sc.key, resultado: null }),
+    }));
+
+    const r = s.resultado;
+    const temaLabel = s.theme === 'dark' ? '◐ Escuro' : s.theme === 'light' ? '○ Claro' : '◑ Sistema';
+
+    return {
+      // shell
+      mostraFaixaDemo: this.props.faixaDemo ?? true,
+      temaLabel,
+      cycleTheme: () => this.aplicarTema(s.theme === 'system' ? 'light' : s.theme === 'light' ? 'dark' : 'system'),
+      fecharMenus: () => { if (s.menu) set({ menu: null }); },
+      navOperacao: [
+        { ...navItem('b1', 'Atualizações da base', 'Aprovar ou descartar tabelas novas de códigos e alíquotas.'), badge: stagingN || false },
+        { ...navItem('b2', 'Alíquotas por estado', 'Ver e conferir a alíquota de ICMS de cada estado.'), badge: divergN || false },
+        navItem('b3', 'Ajustes do sistema', 'Controlar o rigor da análise das planilhas.'),
+        navItem('b4', 'Correções de categoria', 'Corrigir produtos que caem na categoria errada.'),
+        { ...navItem('b5', 'Contestações', 'Responder dúvidas e discordâncias dos analistas.'), badge: abertasN || false },
+      ],
+      navBanco: [navItem('consulta', 'Consultas prontas', 'Perguntar à base e copiar o resultado para o Excel.')],
+      navAjuda: [
+        navItem('manual', 'Manual prático', 'Passo a passo das tarefas do dia a dia.'),
+        { ...navItem('_tour', 'Tour guiado', 'Percorre as telas em 2 minutos, explicando cada área.'), go: () => this.setState({ tour: 0, screen: this.TOUR[0].screen, menu: null }) },
+      ],
+      isManual: s.screen === 'manual',
+      manualView: this.MANUAL.map((m) => ({
+        titulo: m.titulo, passos: m.passos,
+        aberto: s.manualAberto === m.key,
+        seta: s.manualAberto === m.key ? '▲ fechar' : '▼ ver passos',
+        toggle: () => set({ manualAberto: s.manualAberto === m.key ? null : m.key }),
+      })),
+      // tour
+      tourAtivo: s.tour !== null,
+      tourPasso: (s.tour ?? 0) + 1,
+      tourTotal: this.TOUR.length,
+      tourTitulo: s.tour !== null ? this.TOUR[s.tour].titulo : '',
+      tourTexto: s.tour !== null ? this.TOUR[s.tour].texto : '',
+      tourTemAnterior: s.tour !== null && s.tour > 0,
+      tourProxLabel: s.tour !== null && s.tour === this.TOUR.length - 1 ? 'Concluir' : 'Próximo',
+      tourProx: () => {
+        if (s.tour === null) return;
+        if (s.tour >= this.TOUR.length - 1) { this.marcarTourVisto(); set({ tour: null }); return; }
+        const n = s.tour + 1;
+        set({ tour: n, screen: this.TOUR[n].screen, menu: null });
+      },
+      tourAnt: () => {
+        if (s.tour === null || s.tour === 0) return;
+        const n = s.tour - 1;
+        set({ tour: n, screen: this.TOUR[n].screen, menu: null });
+      },
+      tourFechar: () => { this.marcarTourVisto(); set({ tour: null }); },
+      iniciarTour: (e) => { if (e && e.stopPropagation) e.stopPropagation(); set({ tour: 0, screen: this.TOUR[0].screen, menu: null }); },
+      iniciarTourLink: (e) => { if (e && e.preventDefault) e.preventDefault(); set({ tour: 0, screen: this.TOUR[0].screen, menu: null }); },
+      abrirManual: (e) => { if (e && e.stopPropagation) e.stopPropagation(); set({ screen: 'manual', menu: null }); },
+      abrirMenuAjuda: (e) => { if (e && e.stopPropagation) e.stopPropagation(); set({ menu: s.menu === 'ajuda' ? null : 'ajuda' }); },
+      menuAjudaAberto: s.menu === 'ajuda',
+      // dicas (tooltip)
+      tipVisivel: !!s.tip,
+      tipTexto: s.tip ? s.tip.texto : '',
+      tipX: s.tip ? s.tip.x : 0,
+      tipY: s.tip ? s.tip.y : 0,
+      mostrarDica: (e) => {
+        const el = e.currentTarget;
+        const texto = el.getAttribute('data-dica');
+        if (!texto) return;
+        const r2 = el.getBoundingClientRect();
+        const x = Math.max(8, Math.min(r2.left, window.innerWidth - 275));
+        const y = r2.bottom + 8 > window.innerHeight - 60 ? r2.top - 8 - 52 : r2.bottom + 8;
+        this.setState({ tip: { texto, x, y } });
+      },
+      esconderDica: () => this.setState({ tip: null }),
+      isB1: s.screen === 'b1', isB2: s.screen === 'b2', isB3: s.screen === 'b3',
+      isB4: s.screen === 'b4', isB5: s.screen === 'b5', isConsulta: s.screen === 'consulta',
+
+      // B1
+      cargasView,
+      // B2
+      ufsView,
+      // B3
+      paramsView,
+      editarParam: (e) => this.setState((st) => ({ paramEdits: { ...st.paramEdits, [e.target.name]: e.target.value } })),
+      // B4
+      versaoMapa: 'v4 (jun/2026)',
+      categorias: this.CATEGORIAS,
+      excecoesView,
+      formExcecaoAberto: s.formExcecaoAberto,
+      formExcecaoLabel: s.formExcecaoAberto ? 'Fechar' : 'Nova exceção',
+      toggleFormExcecao: () => set({ formExcecaoAberto: !s.formExcecaoAberto, feErro: null }),
+      feNcm: s.fe.ncm, feCategoria: s.fe.categoria, feJustificativa: s.fe.justificativa, feErro: s.feErro || false,
+      editarExcecao: (e) => this.setState((st) => ({ fe: { ...st.fe, [e.target.name]: e.target.value }, feErro: null })),
+      criarExcecao: () => {
+        const ncm = s.fe.ncm.replace(/[^0-9]/g, '');
+        if (ncm.length !== 8) { set({ feErro: 'NCM precisa de 8 dígitos.' }); return; }
+        if (!s.fe.justificativa.trim()) { set({ feErro: 'Justificativa é obrigatória.' }); return; }
+        this.setState((st) => ({
+          excecoes: [{ ncm, categoria: st.fe.categoria, justificativa: st.fe.justificativa, origem: 'curadoria', criadoEm: new Date().toLocaleDateString('pt-BR') }, ...st.excecoes],
+          fe: { ncm: '', categoria: 'EPI', justificativa: '' }, formExcecaoAberto: false, feErro: null,
+        }));
+        this.audit('excecao_categoria_criada', 'regras_excecao:' + ncm + ':v4', '(nova) → ' + s.fe.categoria);
+      },
+      // B5
+      contestacoesView,
+      encNcm: s.enc.ncm, encCategoria: s.enc.categoria, encResolucao: s.enc.resolucao,
+      editarEnc: (e) => this.setState((st) => ({ enc: { ...st.enc, [e.target.name]: e.target.value } })),
+      cancelarEnc: () => set({ encaminhando: null }),
+      // consulta
+      scriptsNav,
+      mostraParamNcm: s.script === 'ncm',
+      mostraParamAliquota: s.script === 'aliquota',
+      mostraParamRegras: s.script === 'regras',
+      mostraParamLinhas: s.script === 'linhas',
+      mostraParamAuditoria: s.script === 'auditoria',
+      mostraParamSaude: s.script === 'saude',
+      mostraParamSql: s.script === 'sql',
+      qNcm: s.q.ncm, qPeriodo: s.q.periodo, qUf: s.q.uf, qStatus: s.q.status, qLUf: s.q.lUf, qAlvo: s.q.alvo, qSql: s.q.sql,
+      editarQ: (e) => this.setState((st) => ({ q: { ...st.q, [e.target.name]: e.target.value } })),
+      ufsSiglas: s.ufs.map((u) => u.uf),
+      statusOpcoes: [{ valor: 'todos', label: 'todos' }].concat(Object.keys(this.STATUSES).map((k) => ({ valor: k, label: this.STATUSES[k].label }))),
+      executarConsulta: () => this.executar(),
+      temResultado: !!r,
+      resultadoErro: r && r.erro ? r.erro : false,
+      resultadoOk: !!(r && !r.erro),
+      resultadoCols: r && r.cols ? r.cols : [],
+      resultadoRows: r && r.rows ? r.rows : [],
+      resultadoNota: r && r.nota ? r.nota : '',
+      resultadoContagem: r && r.rows ? r.rows.length + (r.rows.length === 1 ? ' linha' : ' linhas') : '',
+      copiarLabel: s.copiado ? 'Copiado ✓' : 'Copiar p/ Excel',
+      copiarResultado: () => {
+        if (!r || !r.cols) return;
+        const tsv = [r.cols.join('\t')].concat(r.rows.map((row) => row.join('\t'))).join('\n');
+        try { navigator.clipboard.writeText(tsv); } catch (e) {}
+        this.setState({ copiado: true });
+        setTimeout(() => this.setState({ copiado: false }), 1600);
+      },
+    };
+  }
+}
+
+</script>
+</body>
+</html>
