@@ -59,7 +59,7 @@ export function TopBar() {
         <div className={styles.user}>
           <div className={styles.userText}>
             <strong>{PAPEL_LABEL[role]}</strong>
-            <span>sessão de demonstração</span>
+            <span>{demo ? 'sessão de demonstração' : 'sessão ativa'}</span>
           </div>
           <span className={styles.avatar} aria-hidden="true">{iniciais}</span>
         </div>
